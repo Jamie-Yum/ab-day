@@ -287,11 +287,18 @@ tr:hover td { background: var(--c0); }
             <div class="section-title" style="margin-bottom:0;">행사 목록</div>
             <button class="btn btn-primary btn-sm" onclick="openModal('event-modal')">+ 행사 추가</button>
           </div>
-          <div class="card" style="overflow:hidden;">
-            <table>
-              <thead><tr><th>월</th><th>테마</th><th>날짜</th><th>장소</th><th>앉방마님 팀</th><th></th></tr></thead>
-              <tbody id="admin-events-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody>
-            </table>
+          <div style="display:grid; grid-template-columns:280px 1fr; gap:16px; align-items:start;">
+            <!-- 행사 리스트 (좌) -->
+            <div class="card" style="overflow:hidden;">
+              <div id="admin-events-list" style="display:flex; flex-direction:column;"></div>
+            </div>
+            <!-- 행사 상세 (우) -->
+            <div id="event-detail-panel" class="card" style="padding:24px; display:none;">
+              <div id="event-detail-content"></div>
+            </div>
+            <div id="event-detail-empty" style="display:flex; align-items:center; justify-content:center; color:var(--c2); font-size:13px; padding:40px;">
+              ← 행사를 선택하면 상세 내용을 볼 수 있어요
+            </div>
           </div>
         </div>
 
@@ -317,8 +324,8 @@ tr:hover td { background: var(--c0); }
           </div>
           <div class="card" style="overflow:hidden;">
             <table>
-              <thead><tr><th>월</th><th>이름</th><th>팀</th><th>역할</th><th></th></tr></thead>
-              <tbody id="admin-hosts-body"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody>
+              <thead><tr><th>행사</th><th>날짜</th><th>명단</th><th></th></tr></thead>
+              <tbody id="admin-hosts-body"><tr><td colspan="4" class="loading">불러오는 중...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -326,13 +333,20 @@ tr:hover td { background: var(--c0); }
         <!-- 인물-팀 관리 -->
         <div id="admin-people" style="display:none;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-            <div class="section-title" style="margin-bottom:0;">인물-팀 매칭</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="section-title" style="margin-bottom:0;">인물-팀 매칭</div>
+              <div style="display:flex; gap:4px;">
+                <button class="btn btn-ghost btn-sm" onclick="sortPeople('name')" id="sort-name">이름 ↕</button>
+                <button class="btn btn-ghost btn-sm" onclick="sortPeople('team')" id="sort-team">팀 ↕</button>
+                <button class="btn btn-ghost btn-sm" onclick="sortPeople('title')" id="sort-title">직함 ↕</button>
+              </div>
+            </div>
             <button class="btn btn-primary btn-sm" onclick="openModal('people-modal')">+ 인물 추가</button>
           </div>
           <div class="card" style="overflow:hidden;">
             <table>
-              <thead><tr><th>이름</th><th>팀</th><th>직함</th><th></th></tr></thead>
-              <tbody id="admin-people-body"><tr><td colspan="4" class="loading">불러오는 중...</td></tr></tbody>
+              <thead><tr><th>이름</th><th>팀</th><th>직함</th><th>앉방마님</th><th>발표</th><th></th></tr></thead>
+              <tbody id="admin-people-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -398,16 +412,12 @@ tr:hover td { background: var(--c0); }
     <div class="modal-title" id="host-modal-title">앉방마님 추가</div>
     <input type="hidden" id="hm-id" />
     <div class="form-group"><label class="form-label">행사 월</label>
-      <select class="form-select" id="hm-month"></select>
+      <select class="form-select" id="hm-month" onchange="refreshHostPeopleSelect()"></select>
     </div>
-    <div class="form-group"><label class="form-label">이름</label><input class="form-input" id="hm-name" placeholder="홍길동" /></div>
-    <div class="form-group"><label class="form-label">역할</label>
-      <select class="form-select" id="hm-lead">
-        <option value="false">팀원</option>
-        <option value="true">팀장 (리드)</option>
-      </select>
+    <div class="form-group">
+      <label class="form-label">명단 선택 <span style="font-weight:400;color:var(--c2);">(인물-팀 관리에서 등록된 인원)</span></label>
+      <div id="hm-people-checkboxes" style="border:1px solid var(--c1);border-radius:6px;max-height:200px;overflow-y:auto;padding:8px 12px;background:#fff;display:grid;gap:4px;"></div>
     </div>
-    <div class="form-group"><label class="form-label">순서</label><input class="form-input" id="hm-order" type="number" placeholder="1" /></div>
     <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">
       <button class="btn btn-ghost" onclick="closeModal('host-modal')">취소</button>
       <button class="btn btn-primary" onclick="saveHost()">저장</button>
@@ -699,19 +709,127 @@ async function loadAdminData() {
   renderAdminPeople();
 }
 
+let selectedEventMonth = null;
+
 function renderAdminEvents() {
-  document.getElementById('admin-events-body').innerHTML = cache.events.map(e => `
-    <tr>
-      <td><span class="tag">${e.month}</span></td>
-      <td>${e.theme || '—'}</td>
-      <td style="color:var(--c3);font-size:12px;">${e.date || '—'}</td>
-      <td style="color:var(--c3);font-size:12px;">${e.location || '—'}</td>
-      <td style="color:var(--c3);font-size:12px;">${e.host_team || '—'}</td>
-      <td style="text-align:right;">
-        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editEvent('${e.id}')">수정</button>
+  const list = document.getElementById('admin-events-list');
+  if (!cache.events.length) {
+    list.innerHTML = '<div class="loading" style="padding:20px;">등록된 행사가 없습니다</div>';
+    return;
+  }
+  list.innerHTML = cache.events.map(e => `
+    <div onclick="selectEvent('${e.month}')" style="
+      padding:14px 16px;
+      border-bottom:1px solid var(--c1);
+      cursor:pointer;
+      transition:background 0.12s;
+      background: ${e.month === selectedEventMonth ? 'var(--c0)' : '#fff'};
+      border-left: 3px solid ${e.month === selectedEventMonth ? 'var(--c4)' : 'transparent'};
+    " onmouseover="this.style.background='var(--c0)'" onmouseout="this.style.background='${e.month === selectedEventMonth ? 'var(--c0)' : '#fff'}'"
+    >
+      <div style="font-size:13px;font-weight:600;color:var(--c5);">${fmtMonth(e.month)}</div>
+      <div style="font-size:11px;color:var(--c2);margin-top:3px;">${e.date || e.month}${e.host_team ? ' · '+e.host_team : ''}</div>
+    </div>`).join('');
+
+  // 선택된 행사 없으면 첫 번째 자동 선택
+  if (!selectedEventMonth && cache.events.length) {
+    selectEvent(cache.events[0].month);
+  } else if (selectedEventMonth) {
+    selectEvent(selectedEventMonth);
+  }
+}
+
+function selectEvent(month) {
+  selectedEventMonth = month;
+  // 리스트 하이라이트 재렌더
+  document.querySelectorAll('#admin-events-list > div').forEach(el => {
+    const isSelected = el.querySelector('div').textContent === fmtMonth(month);
+    el.style.borderLeft = isSelected ? '3px solid var(--c4)' : '3px solid transparent';
+    el.style.background = isSelected ? 'var(--c0)' : '#fff';
+  });
+
+  const e = cache.events.find(x => x.month === month);
+  if (!e) return;
+
+  document.getElementById('event-detail-empty').style.display = 'none';
+  document.getElementById('event-detail-panel').style.display = '';
+
+  const hosts = cache.hosts.filter(h => h.event_month === month).sort((a,b)=>a.order_num-b.order_num);
+  const pres  = cache.presentations.filter(p => p.event_month === month).sort((a,b)=>a.order_num-b.order_num);
+
+  const hostsHtml = hosts.length
+    ? hosts.map(h => {
+        const info = peopleMap[h.name];
+        return `<span style="font-size:13px;color:var(--c5);">${h.name}</span><span style="font-size:11px;color:var(--c2);margin-left:3px;">${info?'('+info.team+')':''}</span>`;
+      }).join('<span style="color:var(--c1);margin:0 6px;">·</span>')
+    : '<span style="color:var(--c2);">등록된 명단 없음</span>';
+
+  const presHtml = pres.length
+    ? pres.map(p => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--c1);">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
+            <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
+          </div>
+          <span class="tag" style="flex-shrink:0;">${p.type}</span>
+          <span style="font-size:12px;color:var(--c2);flex-shrink:0;">${p.duration_min?p.duration_min+'분':''}</span>
+          <div style="display:flex;gap:4px;flex-shrink:0;">
+            <button class="btn btn-ghost btn-sm" onclick="editPres('${p.id}')">수정</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}','loadAdminData')">삭제</button>
+          </div>
+        </div>`).join('')
+    : '<div style="color:var(--c2);font-size:13px;padding:12px 0;">등록된 발표 없음</div>';
+
+  document.getElementById('event-detail-content').innerHTML = `
+    <!-- 헤더 -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+      <div>
+        <div style="font-size:18px;font-weight:700;color:var(--c5);">${fmtMonth(month)}</div>
+        <div style="font-size:12px;color:var(--c2);margin-top:3px;">${e.date || ''} ${e.time_range || ''}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="editEvent('${e.id}')">기본정보 수정</button>
         <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_events','${e.id}','loadAdminData')">삭제</button>
-      </td>
-    </tr>`).join('');
+      </div>
+    </div>
+
+    <!-- 기본 정보 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+      <div style="background:var(--c0);border-radius:8px;padding:12px;">
+        <div style="font-size:11px;color:var(--c2);margin-bottom:4px;">테마</div>
+        <div style="font-size:13px;color:var(--c5);font-weight:500;">${e.theme || '—'}</div>
+      </div>
+      <div style="background:var(--c0);border-radius:8px;padding:12px;">
+        <div style="font-size:11px;color:var(--c2);margin-bottom:4px;">장소</div>
+        <div style="font-size:13px;color:var(--c5);font-weight:500;">${e.location || '—'}</div>
+      </div>
+      <div style="background:var(--c0);border-radius:8px;padding:12px;grid-column:1/-1;">
+        <div style="font-size:11px;color:var(--c2);margin-bottom:6px;">앉방마님 명단</div>
+        <div>${hostsHtml}</div>
+      </div>
+    </div>
+
+    <!-- 발표 세션 -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:600;color:var(--c5);">발표 세션</div>
+      <button class="btn btn-primary btn-sm" onclick="openPresModalForEvent('${month}')">+ 발표 추가</button>
+    </div>
+    <div>${presHtml}</div>
+  `;
+}
+
+// 특정 행사 월로 발표 추가 모달 열기
+function openPresModalForEvent(month) {
+  document.getElementById('pm-month').innerHTML = cache.events.map(e =>
+    `<option value="${e.month}" ${e.month===month?'selected':''} >${fmtMonth(e.month)}</option>`
+  ).join('');
+  document.getElementById('pm-id').value = '';
+  document.getElementById('pm-title').value = '';
+  document.getElementById('pm-presenter').value = '';
+  document.getElementById('pm-duration').value = '';
+  document.getElementById('pm-order').value = '';
+  document.getElementById('pres-modal-title').textContent = '발표 추가';
+  document.getElementById('pres-modal').classList.add('open');
 }
 
 function renderAdminPres() {
@@ -730,33 +848,88 @@ function renderAdminPres() {
 }
 
 function renderAdminHosts() {
-  document.getElementById('admin-hosts-body').innerHTML = cache.hosts.map(h => {
-    const info = peopleMap[h.name];
-    return `
-    <tr>
-      <td><span class="tag" style="font-size:10px;">${h.event_month}</span></td>
-      <td>${h.name}</td>
-      <td style="color:var(--c3);font-size:12px;">${info ? info.team : '—'}</td>
-      <td>${h.is_lead ? '<span class="tag tag-dark">리드</span>' : '<span class="tag">팀원</span>'}</td>
-      <td style="text-align:right;">
-        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editHost('${h.id}')">수정</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_hosts','${h.id}','loadAdminData')">삭제</button>
+  // 월별 그룹핑
+  const byMonth = {};
+  cache.hosts.forEach(h => {
+    if (!byMonth[h.event_month]) byMonth[h.event_month] = [];
+    byMonth[h.event_month].push(h);
+  });
+  const months = Object.keys(byMonth).sort((a,b) => b.localeCompare(a));
+  document.getElementById('admin-hosts-body').innerHTML = months.map(month => {
+    const ev = cache.events.find(e => e.month === month);
+    const hostList = byMonth[month].sort((a,b) => a.order_num - b.order_num);
+    const nameHtml = hostList.map(h => {
+      const info = peopleMap[h.name];
+      return info ? `${h.name}(${info.team})` : h.name;
+    }).join(', ');
+    return `<tr>
+      <td><span class="tag" style="font-size:10px;">${fmtMonth(month)}</span></td>
+      <td style="color:var(--c3);font-size:12px;">${ev ? ev.date : month}</td>
+      <td style="font-size:13px;color:var(--c5);">${nameHtml}</td>
+      <td style="text-align:right;white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="openEditHostModal('${month}')">수정</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteHostsByMonth('${month}')">삭제</button>
       </td>
     </tr>`;
   }).join('');
 }
 
+let peopleSortKey = 'name';
+let peopleSortAsc = true;
+
+function sortPeople(key) {
+  if (peopleSortKey === key) {
+    peopleSortAsc = !peopleSortAsc;
+  } else {
+    peopleSortKey = key;
+    peopleSortAsc = true;
+  }
+  // 버튼 표시 업데이트
+  ['name','team','title'].forEach(k => {
+    const btn = document.getElementById('sort-'+k);
+    const labels = {name:'이름',team:'팀',title:'직함'};
+    if (btn) btn.textContent = labels[k] + (k === peopleSortKey ? (peopleSortAsc ? ' ↑' : ' ↓') : ' ↕');
+  });
+  renderAdminPeople();
+}
+
 function renderAdminPeople() {
-  document.getElementById('admin-people-body').innerHTML = cache.people.map(p => `
-    <tr>
+  const sorted = [...cache.people].sort((a, b) => {
+    const va = (a[peopleSortKey] || '').toLowerCase();
+    const vb = (b[peopleSortKey] || '').toLowerCase();
+    return peopleSortAsc ? va.localeCompare(vb, 'ko') : vb.localeCompare(va, 'ko');
+  });
+
+  document.getElementById('admin-people-body').innerHTML = sorted.map(p => {
+    // 앉방마님 이력
+    const hostMonths = cache.hosts
+      .filter(h => h.name === p.name)
+      .map(h => h.event_month)
+      .sort((a,b) => b.localeCompare(a));
+    const hostHtml = hostMonths.length
+      ? hostMonths.map(m => `<span class="tag" style="font-size:10px;margin-right:2px;">${fmtMonth(m)}</span>`).join('')
+      : '<span style="color:var(--c2);font-size:12px;">—</span>';
+
+    // 발표 이력
+    const presItems = cache.presentations.filter(pr => {
+      return pr.presenter.split(',').map(n=>n.trim()).includes(p.name);
+    }).sort((a,b) => b.event_month.localeCompare(a.event_month));
+    const presHtml = presItems.length
+      ? presItems.map(pr => `<div style="font-size:11px;color:var(--c3);margin-bottom:2px;"><span style="color:var(--c2);">${fmtMonth(pr.event_month)}</span> ${pr.title}</div>`).join('')
+      : '<span style="color:var(--c2);font-size:12px;">—</span>';
+
+    return `<tr>
       <td style="font-weight:500;">${p.name}</td>
       <td style="color:var(--c3);">${p.team}</td>
       <td style="color:var(--c3);font-size:12px;">${p.title || '—'}</td>
-      <td style="text-align:right;">
+      <td style="max-width:180px;">${hostHtml}</td>
+      <td style="max-width:220px;">${presHtml}</td>
+      <td style="text-align:right;white-space:nowrap;">
         <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPerson('${p.id}')">수정</button>
         <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_people','${p.id}','loadAdminData')">삭제</button>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 function switchAdminTab(tab, btn) {
@@ -768,12 +941,45 @@ function switchAdminTab(tab, btn) {
 
 // ── 모달 ──
 function openModal(id) {
-  // 행사 월 셀렉트 채우기
-  if (id === 'pres-modal' || id === 'host-modal') {
-    const sel = document.getElementById(id === 'pres-modal' ? 'pm-month' : 'hm-month');
-    sel.innerHTML = cache.events.map(e => `<option value="${e.month}">${fmtMonth(e.month)}</option>`).join('');
+  if (id === 'pres-modal') {
+    document.getElementById('pm-month').innerHTML = cache.events.map(e => `<option value="${e.month}">${fmtMonth(e.month)}</option>`).join('');
+  }
+  if (id === 'host-modal') {
+    // 행사 셀렉트 채우기
+    document.getElementById('hm-month').innerHTML = cache.events.map(e => `<option value="${e.month}">${fmtMonth(e.month)}</option>`).join('');
+    document.getElementById('hm-id').value = '';
+    // 첫 번째 월 기준으로 체크박스 렌더
+    refreshHostPeopleSelect();
   }
   document.getElementById(id).classList.add('open');
+}
+
+// 앉방마님 모달: 인물 체크박스 렌더
+function refreshHostPeopleSelect() {
+  const month = document.getElementById('hm-month').value;
+  const existing = cache.hosts.filter(h => h.event_month === month).map(h => h.name);
+  const container = document.getElementById('hm-people-checkboxes');
+  if (!cache.people.length) {
+    container.innerHTML = '<div style="color:var(--c2);font-size:13px;">인물-팀 관리에서 먼저 인물을 등록해주세요</div>';
+    return;
+  }
+  const sorted = [...cache.people].sort((a,b) => a.name.localeCompare(b.name, 'ko'));
+  container.innerHTML = sorted.map(p => `
+    <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px;color:var(--c5);">
+      <input type="checkbox" value="${p.name}" ${existing.includes(p.name) ? 'checked' : ''}
+        style="width:14px;height:14px;accent-color:var(--c4);" />
+      <span>${p.name}</span>
+      <span style="font-size:11px;color:var(--c2);">${p.team}${p.title ? ' · '+p.title : ''}</span>
+    </label>`).join('');
+}
+
+// 월별 앉방마님 수정 모달 열기
+function openEditHostModal(month) {
+  document.getElementById('hm-month').innerHTML = cache.events.map(e => `<option value="${e.month}" ${e.month===month ? 'selected' : ''}>${fmtMonth(e.month)}</option>`).join('');
+  document.getElementById('hm-id').value = month; // 수정 시 month를 id로 활용
+  refreshHostPeopleSelect();
+  document.getElementById('host-modal-title').textContent = '앉방마님 수정';
+  document.getElementById('host-modal').classList.add('open');
 }
 
 function closeModal(id) {
@@ -841,6 +1047,8 @@ async function savePresentation() {
   closeModal('pres-modal');
   resetForm(['pm-id','pm-title','pm-presenter','pm-duration','pm-order']);
   await loadAdminData();
+  // 상세 패널 갱신
+  if (selectedEventMonth) selectEvent(selectedEventMonth);
 }
 
 function editPres(id) {
@@ -861,36 +1069,29 @@ function editPres(id) {
 
 // ── 앉방마님 저장 ──
 async function saveHost() {
-  const id = document.getElementById('hm-id').value;
-  const data = {
-    event_month: document.getElementById('hm-month').value,
-    name:        document.getElementById('hm-name').value.trim(),
-    is_lead:     document.getElementById('hm-lead').value === 'true',
-    order_num:   parseInt(document.getElementById('hm-order').value) || 0,
-  };
-  if (!data.name) return alert('이름을 입력하세요');
-  if (id) {
-    await sb.from('anbang_hosts').update(data).eq('id', id);
-  } else {
-    await sb.from('anbang_hosts').insert(data);
-  }
+  const month = document.getElementById('hm-month').value;
+  const checked = [...document.querySelectorAll('#hm-people-checkboxes input[type=checkbox]:checked')].map(cb => cb.value);
+  if (!month) return alert('행사 월을 선택하세요');
+  if (!checked.length) return alert('명단을 1명 이상 선택하세요');
+
+  // 기존 해당 월 명단 삭제 후 재삽입
+  await sb.from('anbang_hosts').delete().eq('event_month', month);
+  const inserts = checked.map((name, idx) => ({
+    event_month: month,
+    name,
+    is_lead: idx === 0,   // 첫 번째 선택이 리드
+    order_num: idx,
+  }));
+  await sb.from('anbang_hosts').insert(inserts);
+
   closeModal('host-modal');
-  resetForm(['hm-id','hm-name','hm-order']);
   await loadAdminData();
 }
 
-function editHost(id) {
-  const h = cache.hosts.find(x => x.id === id);
-  if (!h) return;
-  openModal('host-modal');
-  setTimeout(() => {
-    document.getElementById('hm-id').value    = h.id;
-    document.getElementById('hm-month').value = h.event_month;
-    document.getElementById('hm-name').value  = h.name;
-    document.getElementById('hm-lead').value  = String(h.is_lead);
-    document.getElementById('hm-order').value = h.order_num || '';
-    document.getElementById('host-modal-title').textContent = '앉방마님 수정';
-  }, 50);
+async function deleteHostsByMonth(month) {
+  if (!confirm(`${fmtMonth(month)} 앉방마님 명단을 삭제하시겠습니까?`)) return;
+  await sb.from('anbang_hosts').delete().eq('event_month', month);
+  await loadAdminData();
 }
 
 // ── 인물 저장 ──
@@ -928,6 +1129,7 @@ async function deleteRow(table, id, reloadFn) {
   if (!confirm('정말 삭제하시겠습니까?')) return;
   await sb.from(table).delete().eq('id', id);
   await loadAdminData();
+  if (selectedEventMonth && table === 'anbang_presentations') selectEvent(selectedEventMonth);
 }
 
 // ── 폼 초기화 ──
