@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>시디즈 앉방데이</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --c0: #f0f1f5;
+  --c1: #e8eaf0;
+  --c2: #b0b8cc;
+  --c3: #5a6280;
+  --c4: #1e2540;
+  --c5: #111827;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans KR', sans-serif; background: var(--c0); color: var(--c5); -webkit-font-smoothing: antialiased; }
+
+/* Sidebar */
+#sidebar { width: 200px; min-height: 100vh; background: var(--c5); position: fixed; top: 0; left: 0; z-index: 50; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; }
+#main { margin-left: 200px; min-height: 100vh; }
+.nav-item { display: block; padding: 9px 20px; font-size: 13px; font-weight: 500; color: var(--c2); cursor: pointer; border-radius: 6px; margin: 1px 10px; transition: background 0.15s, color 0.15s; }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+
+/* Pages */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Cards */
+.card { background: #fff; border-radius: 10px; border: 1px solid var(--c1); }
+.hcard { transition: box-shadow 0.15s, transform 0.15s; cursor: pointer; }
+.hcard:hover { box-shadow: 0 4px 16px rgba(30,37,64,0.08); transform: translateY(-1px); }
+
+/* Tags */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: var(--c1); color: var(--c3); white-space: nowrap; }
+.tag-dark { background: var(--c4); color: #fff; }
+.tag-mid { background: var(--c3); color: #fff; }
+
+/* Tabs */
+.tab { padding: 7px 14px; font-size: 13px; font-weight: 500; color: var(--c3); border-radius: 6px; cursor: pointer; border: none; background: transparent; transition: all 0.15s; white-space: nowrap; }
+.tab.active { background: var(--c4); color: #fff; }
+.tab:not(.active):hover { background: var(--c1); color: var(--c5); }
+
+/* Checklist */
+.chk { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--c1); }
+.chk:last-child { border-bottom: none; }
+.chk-box { width: 16px; height: 16px; min-width: 16px; border-radius: 3px; margin-top: 2px; border: 1.5px solid var(--c2); flex-shrink: 0; }
+.chk-box.done { background: var(--c4); border-color: var(--c4); display: flex; align-items: center; justify-content: center; }
+
+/* Timeline */
+.tl-item { position: relative; padding-left: 28px; padding-bottom: 24px; }
+.tl-item::before { content: ''; position: absolute; left: 7px; top: 18px; bottom: 0; width: 1px; background: var(--c1); }
+.tl-item:last-child::before { display: none; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-dot { position: absolute; left: 0; top: 10px; width: 16px; height: 16px; border-radius: 50%; background: var(--c4); }
+
+/* Table */
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-size: 11px; font-weight: 600; color: var(--c2); padding: 10px 16px; border-bottom: 1px solid var(--c1); text-transform: uppercase; letter-spacing: 0.05em; }
+td { padding: 11px 16px; font-size: 13px; color: var(--c5); border-bottom: 1px solid var(--c1); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--c0); }
+
+/* Forms */
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--c3); margin-bottom: 5px; }
+.form-input { width: 100%; border: 1px solid var(--c1); border-radius: 6px; padding: 9px 12px; font-size: 13px; font-family: inherit; color: var(--c5); outline: none; background: #fff; transition: border 0.15s; }
+.form-input:focus { border-color: var(--c4); }
+.form-select { width: 100%; border: 1px solid var(--c1); border-radius: 6px; padding: 9px 12px; font-size: 13px; font-family: inherit; color: var(--c5); outline: none; background: #fff; }
+.btn { padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: opacity 0.15s; font-family: inherit; }
+.btn:hover { opacity: 0.85; }
+.btn-primary { background: var(--c4); color: #fff; }
+.btn-ghost { background: var(--c1); color: var(--c4); }
+.btn-danger { background: #fee2e2; color: #991b1b; }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+
+/* Modal */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: #fff; border-radius: 12px; padding: 28px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+.modal-title { font-size: 16px; font-weight: 700; color: var(--c5); margin-bottom: 20px; }
+
+/* Misc */
+.divider { height: 1px; background: rgba(255,255,255,0.07); margin: 10px 20px; }
+.section-title { font-size: 13px; font-weight: 600; color: var(--c5); margin-bottom: 14px; }
+.loading { color: var(--c2); font-size: 13px; padding: 20px 0; }
+.row-list-item { display: flex; align-items: center; padding: 13px 20px; border-bottom: 1px solid var(--c1); gap: 16px; }
+.row-list-item:last-child { border-bottom: none; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: var(--c1); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div style="padding:24px 20px 18px; border-bottom:1px solid rgba(255,255,255,0.07);">
+    <div style="font-size:15px; font-weight:700; color:#fff; letter-spacing:-0.3px;">시디즈 앉방데이</div>
+  </div>
+  <nav style="padding:10px 0; flex:1;">
+    <div class="nav-item active" onclick="go('home')">홈</div>
+    <div class="nav-item" onclick="go('event')"><span id="nav-event-label">앉방데이 안내</span></div>
+    <div class="nav-item" onclick="go('presenter')">발표자 가이드</div>
+    <div class="nav-item" onclick="go('story')">지난 앉방데이</div>
+    <div class="divider"></div>
+    <div class="nav-item" onclick="go('admin')">진행 및 운영</div>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- ======================== 홈 ======================== -->
+  <div id="page-home" class="page active">
+    <div style="background:var(--c4); padding:52px 48px 40px;">
+      <div style="max-width:640px;">
+        <div style="font-size:11px; font-weight:600; color:var(--c2); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;" id="home-meta">불러오는 중...</div>
+        <h1 style="font-size:30px; font-weight:700; color:#fff; line-height:1.25; letter-spacing:-0.5px; margin-bottom:8px;" id="home-title">시디즈 앉방데이</h1>
+        <p style="font-size:14px; color:var(--c2); margin-bottom:32px;" id="home-theme"></p>
+        <div style="display:flex; gap:10px;">
+          <button onclick="go('event')" style="background:#fff; color:var(--c4); padding:9px 20px; border-radius:6px; font-size:13px; font-weight:600; border:none; cursor:pointer;">행사 안내</button>
+          <button onclick="go('presenter')" style="background:transparent; color:var(--c2); padding:9px 20px; border-radius:6px; font-size:13px; font-weight:500; border:1px solid rgba(255,255,255,0.2); cursor:pointer;">발표자 가이드</button>
+        </div>
+      </div>
+    </div>
+    <div style="padding:36px 48px; max-width:720px;">
+      <div id="home-cards" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px;">
+        <div class="card" style="padding:20px; animation:pulse 1.5s infinite;"><div style="height:40px; background:var(--c1); border-radius:4px;"></div></div>
+        <div class="card" style="padding:20px;"><div style="height:40px; background:var(--c1); border-radius:4px;"></div></div>
+        <div class="card" style="padding:20px;"><div style="height:40px; background:var(--c1); border-radius:4px;"></div></div>
+      </div>
+      <div id="home-notice" class="card" style="padding:20px; border-left:3px solid var(--c4); display:none;">
+        <div style="font-size:12px; font-weight:600; color:var(--c5); margin-bottom:10px;">공지</div>
+        <div id="home-notice-text" style="font-size:13px; color:var(--c3); line-height:2;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== 행사 안내 ======================== -->
+  <div id="page-event" class="page">
+    <div style="padding:40px 48px; max-width:720px;">
+      <div style="margin-bottom:28px;">
+        <div style="font-size:11px; font-weight:600; color:var(--c2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">행사 안내</div>
+        <h1 style="font-size:24px; font-weight:700; color:var(--c5); letter-spacing:-0.3px;" id="event-title">앉방데이 안내</h1>
+        <p style="font-size:13px; color:var(--c3); margin-top:6px;" id="event-sub"></p>
+      </div>
+      <div id="event-theme-box" class="card" style="padding:24px; background:var(--c4); border-color:var(--c4); margin-bottom:28px; display:none;">
+        <div style="font-size:11px; font-weight:600; color:var(--c2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">이달의 테마</div>
+        <div style="font-size:18px; font-weight:700; color:#fff; margin-bottom:4px;" id="event-theme-title"></div>
+      </div>
+      <div style="margin-bottom:28px;">
+        <div class="section-title">발표 세션</div>
+        <div id="event-pres-list" class="card" style="overflow:hidden;"><div class="loading" style="padding:20px;">불러오는 중...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== 발표자 가이드 ======================== -->
+  <div id="page-presenter" class="page">
+    <div style="padding:40px 48px; max-width:720px;">
+      <div style="margin-bottom:32px;">
+        <div style="font-size:11px; font-weight:600; color:var(--c2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">발표자 안내</div>
+        <h1 style="font-size:24px; font-weight:700; color:var(--c5); letter-spacing:-0.3px;">발표 준비 가이드</h1>
+      </div>
+      <div style="margin-bottom:28px;">
+        <div class="section-title">발표 유형</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+          <div class="card" style="padding:18px; border-top:2px solid var(--c4);">
+            <div style="font-size:13px; font-weight:600; color:var(--c5); margin-bottom:8px;">KGI 발표</div>
+            <div style="font-size:12px; color:var(--c3); line-height:1.7;">분기 핵심 성과 공유. 팀장 주도, 10–15분.</div>
+            <div style="margin-top:10px; font-size:11px; color:var(--c2);">슬라이드 10장 이내 · 데이터 중심</div>
+          </div>
+          <div class="card" style="padding:18px; border-top:2px solid var(--c4);">
+            <div style="font-size:13px; font-weight:600; color:var(--c5); margin-bottom:8px;">AI CAN DO</div>
+            <div style="font-size:12px; color:var(--c3); line-height:1.7;">AI 도구 실무 적용 사례. 누구든 신청 가능.</div>
+            <div style="margin-top:10px; font-size:11px; color:var(--c2);">15분 발표 · 실제 화면 시연 가능</div>
+          </div>
+          <div class="card" style="padding:18px; border-top:2px solid var(--c4);">
+            <div style="font-size:13px; font-weight:600; color:var(--c5); margin-bottom:8px;">실무 업무 발표</div>
+            <div style="font-size:12px; color:var(--c3); line-height:1.7;">프로젝트, 협업 경험 등 자유 형식.</div>
+            <div style="margin-top:10px; font-size:11px; color:var(--c2);">10–20분 · 형식 자유</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-bottom:28px;">
+        <div class="section-title">준비 일정</div>
+        <div class="card" style="padding:24px;">
+          <div style="display:flex; align-items:flex-start; gap:20px; padding:12px 0; border-bottom:1px solid var(--c1);">
+            <div style="min-width:44px; font-size:11px; font-weight:700; color:var(--c3); padding-top:2px;">D-10</div>
+            <div><div style="font-size:13px; font-weight:500; color:var(--c5);">발표 주제 확정 및 운영팀 전달</div><div style="font-size:12px; color:var(--c2); margin-top:2px;">슬랙 #앉방데이 채널 또는 이메일</div></div>
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:20px; padding:12px 0; border-bottom:1px solid var(--c1);">
+            <div style="min-width:44px; font-size:11px; font-weight:700; color:var(--c3); padding-top:2px;">D-7</div>
+            <div><div style="font-size:13px; font-weight:500; color:var(--c5);">초안 피드백 요청 (선택)</div></div>
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:20px; padding:12px 16px; border-bottom:1px solid var(--c1); background:var(--c0); margin:0 -24px;">
+            <div style="min-width:44px; font-size:11px; font-weight:700; color:var(--c4); padding-top:2px;">D-4</div>
+            <div><div style="font-size:13px; font-weight:600; color:var(--c5);">발표 자료 제출 마감</div><div style="font-size:12px; color:var(--c2); margin-top:2px;">이메일 또는 공유 드라이브 업로드</div></div>
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:20px; padding:12px 0; border-bottom:1px solid var(--c1);">
+            <div style="min-width:44px; font-size:11px; font-weight:700; color:var(--c3); padding-top:2px;">D-1</div>
+            <div><div style="font-size:13px; font-weight:500; color:var(--c5);">리허설 — 오후 4시, 4층 4C</div></div>
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:20px; padding:12px 0;">
+            <div style="min-width:44px; font-size:11px; font-weight:700; color:var(--c5); padding-top:2px;">D-Day</div>
+            <div><div style="font-size:13px; font-weight:500; color:var(--c5);">시작 15분 전 입장, 마이크 테스트</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="card" style="padding:20px;">
+          <div class="section-title">유의사항</div>
+          <div style="font-size:12px; color:var(--c3); line-height:2.1;">슬라이드 비율 16:9<br>발표 시간 엄수<br>영상 파일 별도 제출<br>외부 기밀 자료 포함 불가<br>발표자 변경 시 사전 공지</div>
+        </div>
+        <div class="card" style="padding:20px;">
+          <div class="section-title">자료 제출</div>
+          <div style="font-size:12px; color:var(--c3); line-height:2.1;">이메일: anbang@sidiz.com<br>드라이브: 앉방데이 / 2025 / 해당월<br>슬랙: #앉방데이-자료제출</div>
+          <div style="margin-top:12px; font-size:11px; color:var(--c2);">파일명: [유형]_[이름]_[제목].pptx</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== 지난 앉방데이 ======================== -->
+  <div id="page-story" class="page">
+    <div style="padding:40px 48px; max-width:860px;">
+      <div style="margin-bottom:24px;">
+        <h1 style="font-size:24px; font-weight:700; color:var(--c5); letter-spacing:-0.3px;">지난 앉방데이</h1>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+        <input id="q" oninput="filterStory()" placeholder="발표 제목, 발표자, 팀 이름으로 검색"
+          style="flex:1; min-width:180px; border:1px solid var(--c1); border-radius:6px; padding:9px 14px; font-size:13px; font-family:inherit; color:var(--c5); outline:none; background:#fff;" />
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="tab active" onclick="switchTab('events',this)">앉방데이</button>
+          <button class="tab" onclick="switchTab('presentations',this)">발표</button>
+          <button class="tab" onclick="switchTab('aicando',this)">AI CAN DO</button>
+          <button class="tab" onclick="switchTab('hosts',this)">앉방마님</button>
+        </div>
+      </div>
+      <div id="story-events"><div id="events-grid" style="display:grid; gap:8px;"></div></div>
+      <div id="story-presentations" style="display:none;"><div class="card" id="pres-list"></div></div>
+      <div id="story-aicando" style="display:none;"><div class="card" id="aicando-list"></div></div>
+      <div id="story-hosts" style="display:none;"><div class="card" id="hosts-list"></div></div>
+    </div>
+  </div>
+
+  <!-- ======================== 진행 및 운영 ======================== -->
+  <div id="page-admin" class="page">
+    <!-- 로그인 화면 -->
+    <div id="admin-login" style="display:flex; align-items:center; justify-content:center; min-height:100vh;">
+      <div class="card" style="padding:36px; width:320px; text-align:center;">
+        <div style="font-size:16px; font-weight:700; color:var(--c5); margin-bottom:6px;">진행 및 운영</div>
+        <div style="font-size:13px; color:var(--c3); margin-bottom:24px;">운영팀 전용 페이지입니다</div>
+        <input type="password" id="admin-pw" class="form-input" placeholder="패스워드 입력" style="margin-bottom:10px; text-align:center;" onkeydown="if(event.key==='Enter') checkPw()" />
+        <button class="btn btn-primary" style="width:100%;" onclick="checkPw()">입장</button>
+        <div id="pw-error" style="font-size:12px; color:#991b1b; margin-top:8px; display:none;">패스워드가 올바르지 않습니다</div>
+      </div>
+    </div>
+
+    <!-- 관리 화면 -->
+    <div id="admin-panel" style="display:none;">
+      <div style="background:var(--c5); padding:24px 48px;">
+        <div style="max-width:920px; display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <div style="font-size:11px; color:var(--c3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">운영자</div>
+            <div style="font-size:20px; font-weight:700; color:#fff;">진행 및 운영</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="logout()">로그아웃</button>
+        </div>
+      </div>
+
+      <div style="padding:28px 48px; max-width:920px;">
+        <!-- 관리 탭 -->
+        <div style="display:flex; gap:6px; margin-bottom:24px; border-bottom:1px solid var(--c1); padding-bottom:0;">
+          <button class="tab active" style="border-radius:6px 6px 0 0; padding-bottom:12px;" onclick="switchAdminTab('events',this)">행사 관리</button>
+          <button class="tab" style="border-radius:6px 6px 0 0; padding-bottom:12px;" onclick="switchAdminTab('presentations',this)">발표 관리</button>
+          <button class="tab" style="border-radius:6px 6px 0 0; padding-bottom:12px;" onclick="switchAdminTab('hosts',this)">앉방마님 관리</button>
+          <button class="tab" style="border-radius:6px 6px 0 0; padding-bottom:12px;" onclick="switchAdminTab('people',this)">인물-팀 관리</button>
+        </div>
+
+        <!-- 행사 관리 -->
+        <div id="admin-events">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div class="section-title" style="margin-bottom:0;">행사 목록</div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('event-modal')">+ 행사 추가</button>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <table>
+              <thead><tr><th>월</th><th>테마</th><th>날짜</th><th>장소</th><th>앉방마님 팀</th><th></th></tr></thead>
+              <tbody id="admin-events-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 발표 관리 -->
+        <div id="admin-presentations" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div class="section-title" style="margin-bottom:0;">발표 목록</div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('pres-modal')">+ 발표 추가</button>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <table>
+              <thead><tr><th>월</th><th>발표 제목</th><th>발표자</th><th>유형</th><th>시간</th><th></th></tr></thead>
+              <tbody id="admin-pres-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 앉방마님 관리 -->
+        <div id="admin-hosts" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div class="section-title" style="margin-bottom:0;">앉방마님 명단</div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('host-modal')">+ 명단 추가</button>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <table>
+              <thead><tr><th>월</th><th>이름</th><th>팀</th><th>역할</th><th></th></tr></thead>
+              <tbody id="admin-hosts-body"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 인물-팀 관리 -->
+        <div id="admin-people" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div class="section-title" style="margin-bottom:0;">인물-팀 매칭</div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('people-modal')">+ 인물 추가</button>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <table>
+              <thead><tr><th>이름</th><th>팀</th><th>직함</th><th></th></tr></thead>
+              <tbody id="admin-people-body"><tr><td colspan="4" class="loading">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ======================== MODALS ======================== -->
+
+<!-- 행사 추가/수정 -->
+<div class="modal-bg" id="event-modal">
+  <div class="modal">
+    <div class="modal-title" id="event-modal-title">행사 추가</div>
+    <input type="hidden" id="em-id" />
+    <div class="form-group"><label class="form-label">월 (예: 2025.05)</label><input class="form-input" id="em-month" placeholder="2025.05" /></div>
+    <div class="form-group"><label class="form-label">테마</label><input class="form-input" id="em-theme" placeholder="이달의 테마" /></div>
+    <div class="form-group"><label class="form-label">날짜 (예: 5월 30일 (금))</label><input class="form-input" id="em-date" placeholder="5월 30일 (금)" /></div>
+    <div class="form-group"><label class="form-label">시간</label><input class="form-input" id="em-time" placeholder="15:00 – 17:30" value="15:00 – 17:30" /></div>
+    <div class="form-group"><label class="form-label">장소</label><input class="form-input" id="em-location" placeholder="본사 4층 4C" value="본사 4층 4C" /></div>
+    <div class="form-group"><label class="form-label">앉방마님 팀</label><input class="form-input" id="em-host-team" placeholder="사업운영팀" /></div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">
+      <button class="btn btn-ghost" onclick="closeModal('event-modal')">취소</button>
+      <button class="btn btn-primary" onclick="saveEvent()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 발표 추가/수정 -->
+<div class="modal-bg" id="pres-modal">
+  <div class="modal">
+    <div class="modal-title" id="pres-modal-title">발표 추가</div>
+    <input type="hidden" id="pm-id" />
+    <div class="form-group"><label class="form-label">행사 월</label>
+      <select class="form-select" id="pm-month"></select>
+    </div>
+    <div class="form-group"><label class="form-label">발표 제목</label><input class="form-input" id="pm-title" placeholder="발표 제목" /></div>
+    <div class="form-group"><label class="form-label">발표자 (복수 시 콤마 구분)</label><input class="form-input" id="pm-presenter" placeholder="홍길동, 김철수" /></div>
+    <div class="form-group"><label class="form-label">유형</label>
+      <select class="form-select" id="pm-type">
+        <option value="KGI">KGI</option>
+        <option value="AI CAN DO">AI CAN DO</option>
+        <option value="실무공유">실무공유</option>
+        <option value="전략">전략</option>
+        <option value="마케팅">마케팅</option>
+        <option value="VOC">VOC</option>
+        <option value="기타">기타</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">발표 시간 (분)</label><input class="form-input" id="pm-duration" type="number" placeholder="15" /></div>
+    <div class="form-group"><label class="form-label">순서</label><input class="form-input" id="pm-order" type="number" placeholder="1" /></div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">
+      <button class="btn btn-ghost" onclick="closeModal('pres-modal')">취소</button>
+      <button class="btn btn-primary" onclick="savePresentation()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 앉방마님 추가/수정 -->
+<div class="modal-bg" id="host-modal">
+  <div class="modal">
+    <div class="modal-title" id="host-modal-title">앉방마님 추가</div>
+    <input type="hidden" id="hm-id" />
+    <div class="form-group"><label class="form-label">행사 월</label>
+      <select class="form-select" id="hm-month"></select>
+    </div>
+    <div class="form-group"><label class="form-label">이름</label><input class="form-input" id="hm-name" placeholder="홍길동" /></div>
+    <div class="form-group"><label class="form-label">역할</label>
+      <select class="form-select" id="hm-lead">
+        <option value="false">팀원</option>
+        <option value="true">팀장 (리드)</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">순서</label><input class="form-input" id="hm-order" type="number" placeholder="1" /></div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">
+      <button class="btn btn-ghost" onclick="closeModal('host-modal')">취소</button>
+      <button class="btn btn-primary" onclick="saveHost()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 인물 추가/수정 -->
+<div class="modal-bg" id="people-modal">
+  <div class="modal">
+    <div class="modal-title" id="people-modal-title">인물 추가</div>
+    <input type="hidden" id="ppm-id" />
+    <div class="form-group"><label class="form-label">이름</label><input class="form-input" id="ppm-name" placeholder="홍길동" /></div>
+    <div class="form-group"><label class="form-label">팀</label><input class="form-input" id="ppm-team" placeholder="사업운영팀" /></div>
+    <div class="form-group"><label class="form-label">직함 (선택)</label><input class="form-input" id="ppm-title" placeholder="팀장" /></div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">
+      <button class="btn btn-ghost" onclick="closeModal('people-modal')">취소</button>
+      <button class="btn btn-primary" onclick="savePerson()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Supabase 초기화 ──
+const { createClient } = supabase;
+const sb = createClient(
+  'https://dvlrzbckneucpvlacdll.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2bHJ6YmNrbmV1Y3B2bGFjZGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODE0OTUsImV4cCI6MjA5MDU1NzQ5NX0.ofzGfyjndiT-FAIcG9TCFtUSXsagTBYOnhsP91vx0sE'
+);
+
+// ── 상수 ──
+const ADMIN_PW = '1234';  // 패스워드 여기서 변경
+
+// ── 캐시 ──
+let cache = { events: [], presentations: [], hosts: [], people: [] };
+let peopleMap = {};  // 이름 → {team, title}
+
+// ── 유틸 ──
+function fmtMonth(m) {
+  if (!m) return '';
+  const [y, mo] = m.split('.');
+  return y.slice(2) + '년 ' + parseInt(mo) + '월 앉방데이';
+}
+
+function withTeam(nameStr) {
+  if (!nameStr) return '';
+  return nameStr.split(',').map(n => {
+    const name = n.trim();
+    const info = peopleMap[name];
+    return info
+      ? `${name}<span style="font-size:11px;color:var(--c2);margin-left:4px;">(${info.team})</span>`
+      : name;
+  }).join(', ');
+}
+
+// ── 데이터 로드 ──
+async function loadAll() {
+  const [ev, pr, ho, pe] = await Promise.all([
+    sb.from('anbang_events').select('*').order('month', { ascending: false }),
+    sb.from('anbang_presentations').select('*').order('order_num'),
+    sb.from('anbang_hosts').select('*').order('order_num'),
+    sb.from('anbang_people').select('*').order('name'),
+  ]);
+  cache.events       = ev.data || [];
+  cache.presentations = pr.data || [];
+  cache.hosts        = ho.data || [];
+  cache.people       = pe.data || [];
+  peopleMap = {};
+  cache.people.forEach(p => { peopleMap[p.name] = { team: p.team, title: p.title }; });
+}
+
+// ── 네비게이션 ──
+async function go(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + page + "'")) n.classList.add('active');
+  });
+  if (page === 'home')      renderHome();
+  if (page === 'event')     renderEvent();
+  if (page === 'story')     renderStory();
+  if (page === 'admin')     initAdmin();
+}
+
+// ── 홈 ──
+async function renderHome() {
+  if (!cache.events.length) await loadAll();
+  const latest = cache.events[0];
+  if (!latest) return;
+
+  const [y, mo] = latest.month.split('.');
+  const dday = Math.ceil((new Date(latest.date_raw || '2025-04-25') - new Date()) / 86400000);
+  const ddayStr = dday > 0 ? `D-${dday}` : dday === 0 ? 'D-Day' : '종료';
+
+  document.getElementById('home-meta').textContent = `${y}년 ${parseInt(mo)}월 · ${ddayStr}`;
+  document.getElementById('home-title').textContent = `시디즈 앉방데이 ${parseInt(mo)}월`;
+  document.getElementById('home-theme').textContent = latest.theme || '';
+  document.getElementById('nav-event-label').textContent = `${parseInt(mo)}월 앉방데이 안내`;
+
+  document.getElementById('home-cards').innerHTML = `
+    <div class="card" style="padding:20px;">
+      <div style="font-size:11px;color:var(--c2);margin-bottom:6px;">일시</div>
+      <div style="font-size:14px;font-weight:600;color:var(--c5);">${latest.date || '—'}</div>
+      <div style="font-size:12px;color:var(--c3);margin-top:2px;">${latest.time_range || ''}</div>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-size:11px;color:var(--c2);margin-bottom:6px;">장소</div>
+      <div style="font-size:14px;font-weight:600;color:var(--c5);">${latest.location || '—'}</div>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-size:11px;color:var(--c2);margin-bottom:6px;">앉방마님</div>
+      <div style="font-size:14px;font-weight:600;color:var(--c5);">${latest.host_team || '—'}</div>
+      <div style="font-size:12px;color:var(--c3);margin-top:2px;">${getHostNames(latest.month)}</div>
+    </div>
+  `;
+}
+
+function getHostNames(month) {
+  const hosts = cache.hosts.filter(h => h.event_month === month);
+  if (!hosts.length) return '';
+  const lead = hosts.find(h => h.is_lead);
+  const others = hosts.filter(h => !h.is_lead);
+  let parts = [];
+  if (lead) parts.push(lead.name + ' (리드)');
+  if (others.length) parts.push(`외 ${others.length}인`);
+  return parts.join(' ');
+}
+
+// ── 행사 안내 ──
+async function renderEvent() {
+  if (!cache.events.length) await loadAll();
+  const latest = cache.events[0];
+  if (!latest) return;
+
+  const [y, mo] = latest.month.split('.');
+  document.getElementById('event-title').textContent = `${parseInt(mo)}월 앉방데이`;
+  document.getElementById('event-sub').textContent = `${latest.date || ''} ${latest.time_range || ''} · ${latest.location || ''}`;
+
+  if (latest.theme) {
+    document.getElementById('event-theme-box').style.display = '';
+    document.getElementById('event-theme-title').textContent = latest.theme;
+  }
+
+  const pres = cache.presentations.filter(p => p.event_month === latest.month);
+  document.getElementById('event-pres-list').innerHTML = pres.length
+    ? pres.map(p => `
+      <div class="row-list-item">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;color:var(--c5);">${p.title}</div>
+          <div style="font-size:12px;color:var(--c3);margin-top:3px;">${withTeam(p.presenter)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          <span class="tag">${p.type}</span>
+          <span style="font-size:12px;color:var(--c2);">${p.duration_min ? p.duration_min + '분' : ''}</span>
+        </div>
+      </div>`).join('')
+    : '<div class="loading" style="padding:20px;">등록된 발표가 없습니다</div>';
+}
+
+// ── 지난 앉방데이 ──
+async function renderStory() {
+  if (!cache.events.length) await loadAll();
+  renderStoryEvents();
+  renderStoryPres();
+  renderStoryAI();
+  renderStoryHosts();
+}
+
+function renderStoryEvents() {
+  document.getElementById('events-grid').innerHTML = cache.events.map(e => `
+    <div class="card hcard" style="padding:20px 24px;display:flex;align-items:center;gap:24px;" data-s="${e.month} ${e.host_team} ${e.theme}">
+      <div style="min-width:160px;flex-shrink:0;">
+        <div style="font-size:15px;font-weight:700;color:var(--c5);">${fmtMonth(e.month)}</div>
+        <div style="font-size:12px;color:var(--c2);margin-top:2px;">${e.date || e.month}</div>
+      </div>
+      <div style="width:1px;height:32px;background:var(--c1);flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;color:var(--c3);">앉방마님: ${e.host_team || '—'} &nbsp;·&nbsp; ${getHostNames(e.month)}</div>
+        ${e.theme ? `<div style="font-size:12px;color:var(--c2);margin-top:2px;">${e.theme}</div>` : ''}
+      </div>
+      <div style="flex-shrink:0;text-align:right;">
+        <div style="font-size:12px;color:var(--c2);">발표 ${cache.presentations.filter(p=>p.event_month===e.month).length}개</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderStoryPres() {
+  document.getElementById('pres-list').innerHTML = cache.presentations.map(p => `
+    <div class="row-list-item" data-s="${p.title} ${p.presenter} ${p.event_month} ${p.type}">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
+        <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+        <span class="tag">${p.type}</span>
+        <span style="font-size:12px;color:var(--c2);">${fmtMonth(p.event_month)}</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderStoryAI() {
+  const ai = cache.presentations.filter(p => p.type === 'AI CAN DO');
+  document.getElementById('aicando-list').innerHTML = ai.length
+    ? ai.map(p => `
+      <div class="row-list-item" data-s="${p.title} ${p.presenter} ${p.event_month}">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
+          <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
+        </div>
+        <div style="flex-shrink:0;text-align:right;">
+          <div style="font-size:12px;color:var(--c2);">${fmtMonth(p.event_month)}</div>
+        </div>
+      </div>`).join('')
+    : '<div class="loading" style="padding:20px;">등록된 AI CAN DO 발표가 없습니다</div>';
+}
+
+function renderStoryHosts() {
+  // 월별로 묶어서 표시
+  const byMonth = {};
+  cache.hosts.forEach(h => {
+    if (!byMonth[h.event_month]) byMonth[h.event_month] = [];
+    byMonth[h.event_month].push(h);
+  });
+
+  const months = Object.keys(byMonth).sort((a, b) => b.localeCompare(a));
+  document.getElementById('hosts-list').innerHTML = months.map(month => {
+    const hostList = byMonth[month];
+    const lead = hostList.find(h => h.is_lead);
+    const members = hostList.filter(h => !h.is_lead);
+    const allNames = hostList.map(h => withTeam(h.name) + (h.is_lead ? ' <span class="tag" style="font-size:10px;">리드</span>' : '')).join(' &nbsp;·&nbsp; ');
+    return `
+      <div class="row-list-item" data-s="${month} ${hostList.map(h=>h.name).join(' ')}">
+        <div style="min-width:160px;flex-shrink:0;">
+          <div style="font-size:13px;font-weight:600;color:var(--c5);">${fmtMonth(month)}</div>
+        </div>
+        <div style="width:1px;height:24px;background:var(--c1);flex-shrink:0;"></div>
+        <div style="flex:1;font-size:13px;color:var(--c3);">${allNames}</div>
+      </div>`;
+  }).join('');
+}
+
+function switchTab(tab, btn) {
+  ['events','presentations','aicando','hosts'].forEach(t => document.getElementById('story-'+t).style.display='none');
+  document.querySelectorAll('#page-story .tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('story-'+tab).style.display='';
+  btn.classList.add('active');
+}
+
+function filterStory() {
+  const q = document.getElementById('q').value.toLowerCase();
+  document.querySelectorAll('[data-s]').forEach(el => {
+    el.style.display = el.dataset.s.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ── 관리자 ──
+let adminUnlocked = false;
+
+function checkPw() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === ADMIN_PW) {
+    adminUnlocked = true;
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-panel').style.display = '';
+    loadAdminData();
+  } else {
+    document.getElementById('pw-error').style.display = '';
+    document.getElementById('admin-pw').value = '';
+  }
+}
+
+function logout() {
+  adminUnlocked = false;
+  document.getElementById('admin-login').style.display = 'flex';
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-pw').value = '';
+}
+
+function initAdmin() {
+  if (adminUnlocked) loadAdminData();
+}
+
+async function loadAdminData() {
+  await loadAll();
+  renderAdminEvents();
+  renderAdminPres();
+  renderAdminHosts();
+  renderAdminPeople();
+}
+
+function renderAdminEvents() {
+  document.getElementById('admin-events-body').innerHTML = cache.events.map(e => `
+    <tr>
+      <td><span class="tag">${e.month}</span></td>
+      <td>${e.theme || '—'}</td>
+      <td style="color:var(--c3);font-size:12px;">${e.date || '—'}</td>
+      <td style="color:var(--c3);font-size:12px;">${e.location || '—'}</td>
+      <td style="color:var(--c3);font-size:12px;">${e.host_team || '—'}</td>
+      <td style="text-align:right;">
+        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editEvent('${e.id}')">수정</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_events','${e.id}','loadAdminData')">삭제</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderAdminPres() {
+  document.getElementById('admin-pres-body').innerHTML = cache.presentations.map(p => `
+    <tr>
+      <td><span class="tag" style="font-size:10px;">${p.event_month}</span></td>
+      <td>${p.title}</td>
+      <td style="color:var(--c3);font-size:12px;">${p.presenter}</td>
+      <td><span class="tag">${p.type}</span></td>
+      <td style="color:var(--c3);font-size:12px;">${p.duration_min ? p.duration_min + '분' : '—'}</td>
+      <td style="text-align:right;">
+        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPres('${p.id}')">수정</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}','loadAdminData')">삭제</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderAdminHosts() {
+  document.getElementById('admin-hosts-body').innerHTML = cache.hosts.map(h => {
+    const info = peopleMap[h.name];
+    return `
+    <tr>
+      <td><span class="tag" style="font-size:10px;">${h.event_month}</span></td>
+      <td>${h.name}</td>
+      <td style="color:var(--c3);font-size:12px;">${info ? info.team : '—'}</td>
+      <td>${h.is_lead ? '<span class="tag tag-dark">리드</span>' : '<span class="tag">팀원</span>'}</td>
+      <td style="text-align:right;">
+        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editHost('${h.id}')">수정</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_hosts','${h.id}','loadAdminData')">삭제</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAdminPeople() {
+  document.getElementById('admin-people-body').innerHTML = cache.people.map(p => `
+    <tr>
+      <td style="font-weight:500;">${p.name}</td>
+      <td style="color:var(--c3);">${p.team}</td>
+      <td style="color:var(--c3);font-size:12px;">${p.title || '—'}</td>
+      <td style="text-align:right;">
+        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPerson('${p.id}')">수정</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_people','${p.id}','loadAdminData')">삭제</button>
+      </td>
+    </tr>`).join('');
+}
+
+function switchAdminTab(tab, btn) {
+  ['events','presentations','hosts','people'].forEach(t => document.getElementById('admin-'+t).style.display='none');
+  document.querySelectorAll('#admin-panel .tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('admin-'+tab).style.display='';
+  btn.classList.add('active');
+}
+
+// ── 모달 ──
+function openModal(id) {
+  // 행사 월 셀렉트 채우기
+  if (id === 'pres-modal' || id === 'host-modal') {
+    const sel = document.getElementById(id === 'pres-modal' ? 'pm-month' : 'hm-month');
+    sel.innerHTML = cache.events.map(e => `<option value="${e.month}">${fmtMonth(e.month)}</option>`).join('');
+  }
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// 모달 바깥 클릭 시 닫기
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+});
+
+// ── 행사 저장 ──
+async function saveEvent() {
+  const id = document.getElementById('em-id').value;
+  const data = {
+    month:      document.getElementById('em-month').value.trim(),
+    theme:      document.getElementById('em-theme').value.trim(),
+    date:       document.getElementById('em-date').value.trim(),
+    time_range: document.getElementById('em-time').value.trim(),
+    location:   document.getElementById('em-location').value.trim(),
+    host_team:  document.getElementById('em-host-team').value.trim(),
+  };
+  if (!data.month) return alert('월을 입력하세요');
+  if (id) {
+    await sb.from('anbang_events').update(data).eq('id', id);
+  } else {
+    await sb.from('anbang_events').insert(data);
+  }
+  closeModal('event-modal');
+  resetForm(['em-id','em-month','em-theme','em-date','em-host-team']);
+  await loadAdminData();
+}
+
+function editEvent(id) {
+  const e = cache.events.find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('em-id').value       = e.id;
+  document.getElementById('em-month').value    = e.month;
+  document.getElementById('em-theme').value    = e.theme || '';
+  document.getElementById('em-date').value     = e.date || '';
+  document.getElementById('em-time').value     = e.time_range || '';
+  document.getElementById('em-location').value = e.location || '';
+  document.getElementById('em-host-team').value= e.host_team || '';
+  document.getElementById('event-modal-title').textContent = '행사 수정';
+  openModal('event-modal');
+}
+
+// ── 발표 저장 ──
+async function savePresentation() {
+  const id = document.getElementById('pm-id').value;
+  const data = {
+    event_month:  document.getElementById('pm-month').value,
+    title:        document.getElementById('pm-title').value.trim(),
+    presenter:    document.getElementById('pm-presenter').value.trim(),
+    type:         document.getElementById('pm-type').value,
+    duration_min: parseInt(document.getElementById('pm-duration').value) || null,
+    order_num:    parseInt(document.getElementById('pm-order').value) || 0,
+  };
+  if (!data.title) return alert('제목을 입력하세요');
+  if (id) {
+    await sb.from('anbang_presentations').update(data).eq('id', id);
+  } else {
+    await sb.from('anbang_presentations').insert(data);
+  }
+  closeModal('pres-modal');
+  resetForm(['pm-id','pm-title','pm-presenter','pm-duration','pm-order']);
+  await loadAdminData();
+}
+
+function editPres(id) {
+  const p = cache.presentations.find(x => x.id === id);
+  if (!p) return;
+  openModal('pres-modal');
+  setTimeout(() => {
+    document.getElementById('pm-id').value       = p.id;
+    document.getElementById('pm-month').value    = p.event_month;
+    document.getElementById('pm-title').value    = p.title;
+    document.getElementById('pm-presenter').value= p.presenter;
+    document.getElementById('pm-type').value     = p.type;
+    document.getElementById('pm-duration').value = p.duration_min || '';
+    document.getElementById('pm-order').value    = p.order_num || '';
+    document.getElementById('pres-modal-title').textContent = '발표 수정';
+  }, 50);
+}
+
+// ── 앉방마님 저장 ──
+async function saveHost() {
+  const id = document.getElementById('hm-id').value;
+  const data = {
+    event_month: document.getElementById('hm-month').value,
+    name:        document.getElementById('hm-name').value.trim(),
+    is_lead:     document.getElementById('hm-lead').value === 'true',
+    order_num:   parseInt(document.getElementById('hm-order').value) || 0,
+  };
+  if (!data.name) return alert('이름을 입력하세요');
+  if (id) {
+    await sb.from('anbang_hosts').update(data).eq('id', id);
+  } else {
+    await sb.from('anbang_hosts').insert(data);
+  }
+  closeModal('host-modal');
+  resetForm(['hm-id','hm-name','hm-order']);
+  await loadAdminData();
+}
+
+function editHost(id) {
+  const h = cache.hosts.find(x => x.id === id);
+  if (!h) return;
+  openModal('host-modal');
+  setTimeout(() => {
+    document.getElementById('hm-id').value    = h.id;
+    document.getElementById('hm-month').value = h.event_month;
+    document.getElementById('hm-name').value  = h.name;
+    document.getElementById('hm-lead').value  = String(h.is_lead);
+    document.getElementById('hm-order').value = h.order_num || '';
+    document.getElementById('host-modal-title').textContent = '앉방마님 수정';
+  }, 50);
+}
+
+// ── 인물 저장 ──
+async function savePerson() {
+  const id = document.getElementById('ppm-id').value;
+  const data = {
+    name:  document.getElementById('ppm-name').value.trim(),
+    team:  document.getElementById('ppm-team').value.trim(),
+    title: document.getElementById('ppm-title').value.trim() || null,
+  };
+  if (!data.name || !data.team) return alert('이름과 팀을 입력하세요');
+  if (id) {
+    await sb.from('anbang_people').update(data).eq('id', id);
+  } else {
+    await sb.from('anbang_people').insert(data);
+  }
+  closeModal('people-modal');
+  resetForm(['ppm-id','ppm-name','ppm-team','ppm-title']);
+  await loadAdminData();
+}
+
+function editPerson(id) {
+  const p = cache.people.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('ppm-id').value    = p.id;
+  document.getElementById('ppm-name').value  = p.name;
+  document.getElementById('ppm-team').value  = p.team;
+  document.getElementById('ppm-title').value = p.title || '';
+  document.getElementById('people-modal-title').textContent = '인물 수정';
+  openModal('people-modal');
+}
+
+// ── 삭제 ──
+async function deleteRow(table, id, reloadFn) {
+  if (!confirm('정말 삭제하시겠습니까?')) return;
+  await sb.from(table).delete().eq('id', id);
+  await loadAdminData();
+}
+
+// ── 폼 초기화 ──
+function resetForm(ids) {
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+
+// ── 초기 로드 ──
+(async () => {
+  await loadAll();
+  renderHome();
+})();
+</script>
+</body>
+</html>
