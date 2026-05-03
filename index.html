@@ -1,439 +1,644 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>시디즈 앉방데이</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root {
-  --c0: #f0f1f5;
-  --c1: #e8eaf0;
-  --c2: #b0b8cc;
-  --c3: #5a6280;
-  --c4: #1e2540;
-  --c5: #111827;
+/* ── 리셋 & 기본 ── */
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f5f6fa;
+  --bg2:#ffffff;
+  --bg3:#eef0f6;
+  --line:rgba(30,37,64,0.08);
+  --w:#1e2540;
+  --w2:#5a6280;
+  --w3:#b0b8cc;
+  --acc:#1e2540;
+  /* 관리자용 */
+  --c0:#f0f1f5;--c1:#e8eaf0;--c2:#b0b8cc;--c3:#5a6280;--c4:#1e2540;--c5:#111827;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Noto Sans KR', sans-serif; background: var(--c0); color: var(--c5); -webkit-font-smoothing: antialiased; }
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--w);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 
-/* Sidebar */
-#sidebar { width: 200px; min-height: 100vh; background: var(--c5); position: fixed; top: 0; left: 0; z-index: 50; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; }
-#main { margin-left: 200px; min-height: 100vh; }
-.nav-item { display: block; padding: 9px 20px; font-size: 13px; font-weight: 500; color: var(--c2); cursor: pointer; border-radius: 6px; margin: 1px 10px; transition: background 0.15s, color 0.15s; }
-.nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
-.nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+/* ── 네비 ── */
+#nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;transition:background 0.3s;}
+#nav.scrolled{background:rgba(245,246,250,0.94);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,37,64,0.08);}
+.nav-logo{font-size:14px;font-weight:700;color:var(--c4);letter-spacing:-0.3px;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.nav-menu-btn{display:flex;flex-direction:column;gap:5px;cursor:pointer;padding:8px;background:transparent;border:none;}
+.nav-menu-btn span{display:block;width:22px;height:1.5px;background:var(--c4);border-radius:2px;transition:all 0.25s;}
+/* 메뉴 오버레이 */
+#menu-overlay{position:fixed;inset:0;z-index:200;background:var(--c5);display:flex;flex-direction:column;padding:0 40px;transform:translateY(-100%);transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);pointer-events:none;}
+#menu-overlay.open{transform:translateY(0);pointer-events:all;}
+.menu-top{display:flex;align-items:center;justify-content:space-between;height:64px;flex-shrink:0;}
+.menu-logo{font-size:14px;font-weight:700;color:#fff;letter-spacing:-0.3px;}
+.menu-close{display:flex;flex-direction:column;gap:5px;cursor:pointer;padding:8px;background:transparent;border:none;}
+.menu-close span{display:block;width:22px;height:1.5px;background:#fff;border-radius:2px;}
+.menu-close span:first-child{transform:rotate(45deg) translate(4.5px,4.5px);}
+.menu-close span:last-child{transform:rotate(-45deg) translate(4.5px,-4.5px);}
+.menu-items{flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px;}
+.menu-item{font-size:clamp(32px,5vw,52px);font-weight:700;color:rgba(255,255,255,0.35);cursor:pointer;letter-spacing:-1px;transition:color 0.2s;padding:8px 0;background:transparent;border:none;font-family:inherit;text-align:left;}
+.menu-item:hover{color:#fff;}
+.menu-bottom{padding-bottom:40px;display:flex;flex-direction:column;gap:6px;}
+.menu-sub{font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:0.05em;}
 
-/* Pages */
-.page { display: none; }
-.page.active { display: block; }
+/* ── 섹션 공통 ── */
+section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:100px 48px 80px;}
+.inner{max-width:960px;margin:0 auto;width:100%;}
 
-/* Cards */
-.card { background: #fff; border-radius: 10px; border: 1px solid var(--c1); }
-.hcard { transition: box-shadow 0.15s, transform 0.15s; cursor: pointer; }
-.hcard:hover { box-shadow: 0 4px 16px rgba(30,37,64,0.08); transform: translateY(-1px); }
+/* ── 홈 히어로 ── */
+#sec-home{position:relative;overflow:hidden;padding:0 48px;}
+.hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(30,37,64,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(30,37,64,0.06) 1px,transparent 1px);background-size:80px 80px;}
+.hero-bg-radial{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 70%,rgba(245,246,250,0.0) 0%,var(--bg) 100%);}
+.hero-inner{position:relative;z-index:1;max-width:960px;margin:0 auto;width:100%;display:flex;flex-direction:column;justify-content:center;min-height:100vh;padding:80px 0;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--c2);margin-bottom:28px;}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:var(--c4);opacity:0.4;}
+.hero-title{font-size:clamp(72px,16vw,200px);font-weight:900;line-height:0.9;letter-spacing:-4px;color:var(--c4);margin-bottom:0;}
+.hero-title-sub{font-size:clamp(72px,16vw,200px);font-weight:300;line-height:0.9;letter-spacing:-4px;color:var(--c3);}
+.hero-desc{font-size:16px;color:var(--c3);line-height:1.8;margin-top:32px;max-width:480px;}
+.hero-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(30,37,64,0.08);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;margin-top:48px;max-width:600px;}
+.hero-card{background:#fff;padding:20px 24px;}
+.hero-card-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--w3);margin-bottom:8px;}
+.hero-card-val{font-size:15px;font-weight:600;color:var(--c5);}
+.hero-card-sub{font-size:12px;color:var(--c3);margin-top:3px;}
+.hero-cta{display:flex;gap:12px;margin-top:40px;flex-wrap:wrap;}
+.btn-main{padding:12px 28px;background:var(--c4);color:#fff;font-size:14px;font-weight:700;border-radius:8px;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s;}
+.btn-main:hover{opacity:0.88;}
+.btn-outline{padding:12px 28px;background:transparent;color:var(--c4);font-size:14px;font-weight:500;border-radius:8px;border:1px solid rgba(30,37,64,0.2);cursor:pointer;font-family:inherit;transition:all 0.15s;}
+.btn-outline:hover{border-color:var(--c4);background:rgba(30,37,64,0.04);}
 
-/* Tags */
-.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: var(--c1); color: var(--c3); white-space: nowrap; }
-.tag-dark { background: var(--c4); color: #fff; }
-.tag-mid { background: var(--c3); color: #fff; }
+/* ── 섹션 헤더 ── */
+.sec-eyebrow{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--w3);margin-bottom:16px;}
+.sec-title{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-1px;color:var(--c5);line-height:1.1;margin-bottom:12px;}
+.sec-sub{font-size:15px;color:var(--c3);line-height:1.7;}
 
-/* Tabs */
-.tab { padding: 7px 14px; font-size: 13px; font-weight: 500; color: var(--c3); border-radius: 6px; cursor: pointer; border: none; background: transparent; transition: all 0.15s; white-space: nowrap; }
-.tab.active { background: var(--c4); color: #fff; }
-.tab:not(.active):hover { background: var(--c1); color: var(--c5); }
+/* ── 행사 안내 섹션 ── */
+#sec-event{background:var(--bg);}
+.theme-box{border:1px solid rgba(30,37,64,0.1);border-radius:16px;padding:40px 48px;margin:48px 0 40px;background:#fff;position:relative;overflow:hidden;}
+.theme-box::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(30,37,64,0.03) 0%,transparent 70%);}
+.theme-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--c2);margin-bottom:12px;}
+.theme-title{font-size:clamp(22px,3vw,36px);font-weight:800;letter-spacing:-0.5px;color:var(--c5);}
+.pres-list{display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;}
+.pres-item{display:flex;align-items:center;gap:20px;padding:20px 28px;background:#fff;transition:background 0.15s;}
+.pres-item:hover{background:#f8f9fc;}
+.pres-num{font-size:11px;font-weight:700;color:var(--c2);min-width:20px;}
+.pres-info{flex:1;min-width:0;}
+.pres-title{font-size:15px;font-weight:600;color:var(--c5);}
+.pres-presenter{font-size:13px;color:var(--c3);margin-top:4px;}
+.pres-type{font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--c1);color:var(--c3);background:#fff;white-space:nowrap;}
+.pres-dur{font-size:12px;color:var(--c2);white-space:nowrap;}
 
-/* Checklist */
-.chk { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--c1); }
-.chk:last-child { border-bottom: none; }
-.chk-box { width: 16px; height: 16px; min-width: 16px; border-radius: 3px; margin-top: 2px; border: 1.5px solid var(--c2); flex-shrink: 0; }
-.chk-box.done { background: var(--c4); border-color: var(--c4); display: flex; align-items: center; justify-content: center; }
+/* ── 발표자 가이드 섹션 ── */
+#sec-presenter{background:#f0f2f8;}
 
-/* Timeline */
-.tl-item { position: relative; padding-left: 28px; padding-bottom: 24px; }
-.tl-item::before { content: ''; position: absolute; left: 7px; top: 18px; bottom: 0; width: 1px; background: var(--c1); }
-.tl-item:last-child::before { display: none; }
-.tl-item:last-child { padding-bottom: 0; }
-.tl-dot { position: absolute; left: 0; top: 10px; width: 16px; height: 16px; border-radius: 50%; background: var(--c4); }
+.guide-cards{display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;margin-top:32px;}
+.guide-card{background:#fff;cursor:pointer;}
+.guide-card-header{display:flex;align-items:center;justify-content:space-between;padding:22px 24px;transition:background 0.15s;user-select:none;}
+.guide-card-header:hover{background:#f8f9fc;}
+.guide-card-header-left{display:flex;align-items:center;gap:16px;}
+.guide-card-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--c2);min-width:52px;}
+.guide-card-name{font-size:16px;font-weight:700;color:var(--c5);}
+.guide-card-chevron{font-size:14px;color:var(--c2);transition:transform 0.25s;flex-shrink:0;}
+.guide-card.open .guide-card-chevron{transform:rotate(180deg);}
+.guide-card-body{display:none;padding:0 24px 22px;border-top:1px solid rgba(30,37,64,0.07);}
+.guide-card.open .guide-card-body{display:block;}
+.guide-card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding-top:18px;}
+.guide-card-desc{font-size:13px;color:var(--c3);line-height:1.8;}
+.guide-card-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--c2);margin-bottom:8px;}
+.guide-card-name{font-size:17px;font-weight:700;color:var(--c5);margin-bottom:6px;}
+.guide-card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.guide-card-meta-tag{font-size:11px;font-weight:600;color:var(--c3);background:var(--c0);border:1px solid var(--c1);border-radius:999px;padding:3px 10px;white-space:nowrap;}
+.guide-card-desc{font-size:13px;color:var(--c3);line-height:1.8;}
+.schedule-list{margin-top:0;display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;}
+.schedule-item{display:flex;align-items:flex-start;gap:24px;padding:20px 28px;background:#fff;}
+.schedule-item.highlight{background:#eef0f8;}
+.schedule-day{font-size:12px;font-weight:700;color:var(--c2);min-width:44px;padding-top:2px;}
+.schedule-item.highlight .schedule-day{color:var(--c4);}
+.schedule-content-title{font-size:14px;font-weight:600;color:var(--c5);}
+.schedule-content-sub{font-size:12px;color:var(--c3);margin-top:3px;}
+.submit-row{display:grid;grid-template-columns:1fr;gap:12px;margin-top:0;}
+.submit-card{border:1px solid rgba(30,37,64,0.1);border-radius:12px;padding:20px 24px;background:#fff;}
+.submit-card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c2);margin-bottom:10px;}
+.submit-card-body{font-size:13px;color:var(--w2);line-height:2.0;}
 
-/* Table */
-table { width: 100%; border-collapse: collapse; }
-th { text-align: left; font-size: 11px; font-weight: 600; color: var(--c2); padding: 10px 16px; border-bottom: 1px solid var(--c1); text-transform: uppercase; letter-spacing: 0.05em; }
-td { padding: 11px 16px; font-size: 13px; color: var(--c5); border-bottom: 1px solid var(--c1); }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: var(--c0); }
+/* ── 지난 앉방데이 섹션 ── */
+#sec-story{background:#f0f2f8;}
+.story-search{width:100%;background:#fff;border:1px solid rgba(30,37,64,0.12);border-radius:8px;padding:12px 18px;font-size:14px;font-family:inherit;color:var(--c5);outline:none;transition:border-color 0.15s;margin-bottom:20px;}
+.story-search::placeholder{color:var(--c2);}
+.story-search:focus{border-color:rgba(30,37,64,0.3);}
+.story-tabs{display:flex;gap:4px;margin-bottom:28px;flex-wrap:wrap;}
+.s-tab{padding:8px 16px;font-size:13px;font-weight:500;color:var(--c3);border-radius:6px;cursor:pointer;border:1px solid transparent;background:transparent;transition:all 0.15s;font-family:inherit;}
+.s-tab:hover{color:var(--c5);background:rgba(30,37,64,0.05);}
+.s-tab.active{color:var(--c5);border-color:rgba(30,37,64,0.2);background:rgba(30,37,64,0.05);font-weight:600;}
+.story-panel{display:none;}
+.story-panel.active{display:block;}
+/* 행사 목록 */
+.event-rows{display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;}
+.event-row{display:flex;align-items:center;gap:28px;padding:20px 28px;background:#fff;transition:background 0.15s;cursor:pointer;}
+.event-row:hover{background:#f5f6fa;}
+.event-row-month{font-size:15px;font-weight:700;color:var(--c5);min-width:160px;flex-shrink:0;}
+.event-row-date{font-size:12px;color:var(--c2);}
+.event-row-divider{width:1px;height:28px;background:rgba(30,37,64,0.1);flex-shrink:0;}
+.event-row-host{font-size:13px;color:var(--c3);flex:1;}
+.event-row-count{font-size:12px;color:var(--c2);flex-shrink:0;}
+/* 발표 목록 */
+.pres-rows{display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;}
+.pres-row{display:flex;align-items:center;gap:20px;padding:16px 28px;background:#fff;transition:background 0.15s;}
+.pres-row:hover{background:#f5f6fa;}
+/* 앉방마님 목록 */
+.host-rows{display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;}
+.host-row{display:flex;align-items:flex-start;gap:28px;padding:18px 28px;background:#fff;}
+.host-row-month{font-size:13px;font-weight:600;color:var(--c5);min-width:160px;flex-shrink:0;}
+.host-row-names{font-size:13px;color:var(--c3);flex:1;line-height:1.7;}
+.team-hint{font-size:11px;color:var(--c2);margin-left:3px;}
+.type-pill{font-size:11px;font-weight:600;padding:2px 9px;border-radius:4px;border:1px solid var(--c1);color:var(--c3);background:#fff;white-space:nowrap;flex-shrink:0;}
 
-/* Forms */
-.form-group { margin-bottom: 14px; }
-.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--c3); margin-bottom: 5px; }
-.form-input { width: 100%; border: 1px solid var(--c1); border-radius: 6px; padding: 9px 12px; font-size: 13px; font-family: inherit; color: var(--c5); outline: none; background: #fff; transition: border 0.15s; }
-.form-input:focus { border-color: var(--c4); }
-.form-select { width: 100%; border: 1px solid var(--c1); border-radius: 6px; padding: 9px 12px; font-size: 13px; font-family: inherit; color: var(--c5); outline: none; background: #fff; }
-.btn { padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: opacity 0.15s; font-family: inherit; }
-.btn:hover { opacity: 0.85; }
-.btn-primary { background: var(--c4); color: #fff; }
-.btn-ghost { background: var(--c1); color: var(--c4); }
-.btn-danger { background: #fee2e2; color: #991b1b; }
-.btn-sm { padding: 5px 12px; font-size: 12px; }
+/* ── 섹션 구분선 ── */
+.sec-divider{width:100%;height:1px;background:rgba(30,37,64,0.08);}
 
-/* Modal */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
-.modal-bg.open { display: flex; }
-.modal { background: #fff; border-radius: 12px; padding: 28px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
-.modal-title { font-size: 16px; font-weight: 700; color: var(--c5); margin-bottom: 20px; }
+/* ── 스크롤 인디케이터 ── */
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--c2);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;}
+.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--c2),transparent);}
 
-/* Misc */
-.divider { height: 1px; background: rgba(255,255,255,0.07); margin: 10px 20px; }
-.section-title { font-size: 13px; font-weight: 600; color: var(--c5); margin-bottom: 14px; }
-.loading { color: var(--c2); font-size: 13px; padding: 20px 0; }
-.row-list-item { display: flex; align-items: center; padding: 13px 20px; border-bottom: 1px solid var(--c1); gap: 16px; }
-.row-list-item:last-child { border-bottom: none; }
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-thumb { background: var(--c1); border-radius: 3px; }
+/* ── 운영관리 (팝업 레이어) ── */
+#admin-overlay{display:none;position:fixed;inset:0;z-index:200;background:var(--c0);overflow-y:auto;}
+#admin-overlay.open{display:block;}
+.admin-topbar{display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:56px;background:#fff;border-bottom:1px solid var(--c1);position:sticky;top:0;z-index:10;}
+.admin-topbar-title{font-size:15px;font-weight:700;color:var(--c5);}
+.admin-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--c3);cursor:pointer;border:none;background:transparent;font-family:inherit;padding:0;}
+.admin-back:hover{color:var(--c5);}
+
+/* 관리자 내부 스타일 */
+.card{background:#fff;border-radius:10px;border:1px solid var(--c1);}
+.hcard{transition:box-shadow 0.15s,transform 0.15s;cursor:pointer;}
+.hcard:hover{box-shadow:0 4px 16px rgba(30,37,64,0.08);transform:translateY(-1px);}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:var(--c1);color:var(--c3);white-space:nowrap;}
+.tag-dark{background:var(--c4);color:#fff;}
+.tab{padding:7px 14px;font-size:13px;font-weight:500;color:var(--c3);border-radius:6px;cursor:pointer;border:none;background:transparent;transition:all 0.15s;white-space:nowrap;font-family:inherit;}
+.tab.active{background:var(--c4);color:#fff;}
+.tab:not(.active):hover{background:var(--c1);color:var(--c5);}
+.chk{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--c1);}
+.chk:last-child{border-bottom:none;}
+.chk-box{width:16px;height:16px;min-width:16px;border-radius:3px;margin-top:2px;border:1.5px solid var(--c2);flex-shrink:0;}
+.chk-box.done{background:var(--c4);border-color:var(--c4);display:flex;align-items:center;justify-content:center;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:11px;font-weight:600;color:var(--c2);padding:10px 16px;border-bottom:1px solid var(--c1);text-transform:uppercase;letter-spacing:0.05em;}
+td{padding:11px 16px;font-size:13px;color:var(--c5);border-bottom:1px solid var(--c1);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--c0);}
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--c3);margin-bottom:5px;}
+.form-input{width:100%;border:1px solid var(--c1);border-radius:6px;padding:9px 12px;font-size:13px;font-family:inherit;color:var(--c5);outline:none;background:#fff;transition:border 0.15s;}
+.form-input:focus{border-color:var(--c4);}
+.form-select{width:100%;border:1px solid var(--c1);border-radius:6px;padding:9px 12px;font-size:13px;font-family:inherit;color:var(--c5);outline:none;background:#fff;}
+.btn{padding:8px 18px;border-radius:6px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:opacity 0.15s;font-family:inherit;}
+.btn:hover{opacity:0.85;}
+.btn-primary{background:var(--c4);color:#fff;}
+.btn-ghost{background:var(--c1);color:var(--c4);}
+.btn-danger{background:#fee2e2;color:#991b1b;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.section-title{font-size:13px;font-weight:600;color:var(--c5);margin-bottom:14px;}
+.loading{color:var(--c2);font-size:13px;padding:20px 0;}
+.row-list-item{display:flex;align-items:center;padding:13px 20px;border-bottom:1px solid var(--c1);gap:16px;}
+.row-list-item:last-child{border-bottom:none;}
+
+/* 모달 */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:#fff;border-radius:12px;padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.modal-title{font-size:16px;font-weight:700;color:var(--c5);margin-bottom:20px;}
+
+/* 스크롤바 */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:rgba(30,37,64,0.15);border-radius:3px;}
+#admin-overlay::-webkit-scrollbar-thumb{background:var(--c1);}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<aside id="sidebar">
-  <div style="padding:24px 20px 18px; border-bottom:1px solid rgba(255,255,255,0.07);">
-    <div style="font-size:15px; font-weight:700; color:#fff; letter-spacing:-0.3px;">시디즈 앉방데이</div>
+<!-- ── 네비게이션 ── -->
+<nav id="nav">
+  <div class="nav-logo" id="nav-logo">시디즈 앉방데이</div>
+  <button class="nav-menu-btn" onclick="openMenu()" aria-label="메뉴 열기">
+    <span></span><span></span>
+  </button>
+</nav>
+
+<!-- 메뉴 오버레이 -->
+<div id="menu-overlay">
+  <div class="menu-top">
+    <div class="menu-logo">시디즈 앉방데이</div>
+    <button class="menu-close" onclick="closeMenu()" aria-label="메뉴 닫기">
+      <span></span><span></span>
+    </button>
   </div>
-  <nav style="padding:10px 0; flex:1;">
-    <div class="nav-item active" onclick="go('home')">홈</div>
-    <div class="nav-item" onclick="go('event')"><span id="nav-event-label">앉방데이 안내</span></div>
-    <div class="nav-item" onclick="go('presenter')">발표자 가이드</div>
-    <div class="nav-item" onclick="go('story')">지난 앉방데이</div>
-    <div class="divider"></div>
-    <div class="nav-item" onclick="go('admin')">진행 및 운영</div>
-  </nav>
-</aside>
+  <div class="menu-items">
+    <button class="menu-item" onclick="menuGo('sec-event')">행사 안내</button>
+    <button class="menu-item" onclick="menuGo('sec-story')">지난 앉방데이</button>
+    <button class="menu-item" onclick="menuGo('sec-presenter')">발표자 가이드</button>
+  </div>
+  <div class="menu-bottom">
+    <div class="menu-sub">SIDIZ · 사내 행사 허브</div>
+  </div>
+</div>
 
-<!-- MAIN -->
-<div id="main">
+<!-- ══════════════════════════════════
+     섹션 1 — 히어로
+══════════════════════════════════ -->
+<section id="sec-home">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-bg-radial"></div>
+  <div class="hero-inner">
 
-  <!-- ======================== 홈 ======================== -->
-  <div id="page-home" class="page active">
-    <div style="background:var(--c4); padding:52px 48px 40px;">
-      <div style="max-width:640px;">
-        <div style="font-size:11px; font-weight:600; color:var(--c2); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;" id="home-meta">불러오는 중...</div>
-        <h1 style="font-size:30px; font-weight:700; color:#fff; line-height:1.25; letter-spacing:-0.5px; margin-bottom:8px;" id="home-title">시디즈 앉방데이</h1>
-        <p style="font-size:14px; color:var(--c2); margin-bottom:32px;" id="home-theme"></p>
-        <div style="display:flex; gap:10px;">
-          <button onclick="go('event')" style="background:#fff; color:var(--c4); padding:9px 20px; border-radius:6px; font-size:13px; font-weight:600; border:none; cursor:pointer;">행사 안내</button>
-          <button onclick="go('presenter')" style="background:transparent; color:var(--c2); padding:9px 20px; border-radius:6px; font-size:13px; font-weight:500; border:1px solid rgba(255,255,255,0.2); cursor:pointer;">발표자 가이드</button>
-        </div>
+    <h1 class="hero-title">시디즈<br>
+      <span class="hero-title-sub">앉방데이</span>
+    </h1>
+    <p class="hero-desc" id="home-theme">함께 앉고, 함께 나누는<br>우리의 이야기</p>
+    <div class="hero-cards" id="home-cards">
+      <div class="hero-card">
+        <div class="hero-card-label">일시</div>
+        <div class="hero-card-val" id="hc-date">—</div>
+        <div class="hero-card-sub" id="hc-time"></div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-label">장소</div>
+        <div class="hero-card-val" id="hc-location">—</div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-label">앉방마님</div>
+        <div class="hero-card-val" id="hc-host">—</div>
+        <div class="hero-card-sub" id="hc-host-names"></div>
       </div>
     </div>
-    <div style="padding:36px 48px; max-width:720px;">
-      <div id="home-cards" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px;">
-        <div class="card" style="padding:20px; animation:pulse 1.5s infinite;"><div style="height:40px; background:var(--c1); border-radius:4px;"></div></div>
-        <div class="card" style="padding:20px;"><div style="height:40px; background:var(--c1); border-radius:4px;"></div></div>
-        <div class="card" style="padding:20px;"><div style="height:40px; background:var(--c1); border-radius:4px;"></div></div>
-      </div>
-      <div id="home-notice" class="card" style="padding:20px; border-left:3px solid var(--c4); display:none;">
-        <div style="font-size:12px; font-weight:600; color:var(--c5); margin-bottom:10px;">공지</div>
-        <div id="home-notice-text" style="font-size:13px; color:var(--c3); line-height:2;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ======================== 행사 안내 ======================== -->
-  <div id="page-event" class="page">
-    <div style="padding:40px 48px; max-width:720px;">
-      <div style="margin-bottom:28px;">
-        <div style="font-size:11px; font-weight:600; color:var(--c2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">행사 안내</div>
-        <h1 style="font-size:24px; font-weight:700; color:var(--c5); letter-spacing:-0.3px;" id="event-title">앉방데이 안내</h1>
-        <p style="font-size:13px; color:var(--c3); margin-top:6px;" id="event-sub"></p>
-      </div>
-      <div id="event-theme-box" class="card" style="padding:24px; background:var(--c4); border-color:var(--c4); margin-bottom:28px; display:none;">
-        <div style="font-size:11px; font-weight:600; color:var(--c2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">이달의 테마</div>
-        <div style="font-size:18px; font-weight:700; color:#fff; margin-bottom:4px;" id="event-theme-title"></div>
-      </div>
-      <div style="margin-bottom:28px;">
-        <div class="section-title">발표 세션</div>
-        <div id="event-pres-list" class="card" style="overflow:hidden;"><div class="loading" style="padding:20px;">불러오는 중...</div></div>
-      </div>
+    <div class="hero-cta">
+      <button class="btn-main" onclick="scrollToSec('sec-event')">행사 안내 보기</button>
+      <button class="btn-outline" onclick="scrollToSec('sec-presenter')">발표자 가이드</button>
     </div>
   </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>scroll</span>
+  </div>
+</section>
 
-  <!-- ======================== 발표자 가이드 ======================== -->
-  <div id="page-presenter" class="page">
-    <div style="padding:40px 48px; max-width:720px;">
-      <div style="margin-bottom:32px;">
-        <div style="font-size:11px; font-weight:600; color:var(--c2); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">발표자 안내</div>
-        <h1 style="font-size:24px; font-weight:700; color:var(--c5); letter-spacing:-0.3px;">발표 준비 가이드</h1>
-      </div>
-      <div style="margin-bottom:28px;">
-        <div class="section-title">발표 유형</div>
-        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
-          <div class="card" style="padding:18px; border-top:2px solid var(--c4);">
-            <div style="font-size:13px; font-weight:600; color:var(--c5); margin-bottom:8px;">KGI 발표</div>
-            <div style="font-size:12px; color:var(--c3); line-height:1.7;">분기 핵심 성과 공유. 팀장 주도, 10–15분.</div>
-            <div style="margin-top:10px; font-size:11px; color:var(--c2);">슬라이드 10장 이내 · 데이터 중심</div>
-          </div>
-          <div class="card" style="padding:18px; border-top:2px solid var(--c4);">
-            <div style="font-size:13px; font-weight:600; color:var(--c5); margin-bottom:8px;">AI CAN DO</div>
-            <div style="font-size:12px; color:var(--c3); line-height:1.7;">AI 도구 실무 적용 사례. 누구든 신청 가능.</div>
-            <div style="margin-top:10px; font-size:11px; color:var(--c2);">15분 발표 · 실제 화면 시연 가능</div>
-          </div>
-          <div class="card" style="padding:18px; border-top:2px solid var(--c4);">
-            <div style="font-size:13px; font-weight:600; color:var(--c5); margin-bottom:8px;">실무 업무 발표</div>
-            <div style="font-size:12px; color:var(--c3); line-height:1.7;">프로젝트, 협업 경험 등 자유 형식.</div>
-            <div style="margin-top:10px; font-size:11px; color:var(--c2);">10–20분 · 형식 자유</div>
-          </div>
-        </div>
-      </div>
-      <div style="margin-bottom:28px;">
-        <div class="section-title">준비 일정</div>
-        <div class="card" style="padding:24px;">
-          <div style="display:flex; align-items:flex-start; gap:20px; padding:12px 0; border-bottom:1px solid var(--c1);">
-            <div style="min-width:44px; font-size:11px; font-weight:700; color:var(--c3); padding-top:2px;">D-10</div>
-            <div><div style="font-size:13px; font-weight:500; color:var(--c5);">발표 주제 확정 및 운영팀 전달</div><div style="font-size:12px; color:var(--c2); margin-top:2px;">슬랙 #앉방데이 채널 또는 이메일</div></div>
-          </div>
-          <div style="display:flex; align-items:flex-start; gap:20px; padding:12px 0; border-bottom:1px solid var(--c1);">
-            <div style="min-width:44px; font-size:11px; font-weight:700; color:var(--c3); padding-top:2px;">D-7</div>
-            <div><div style="font-size:13px; font-weight:500; color:var(--c5);">초안 피드백 요청 (선택)</div></div>
-          </div>
-          <div style="display:flex; align-items:flex-start; gap:20px; padding:12px 16px; border-bottom:1px solid var(--c1); background:var(--c0); margin:0 -24px;">
-            <div style="min-width:44px; font-size:11px; font-weight:700; color:var(--c4); padding-top:2px;">D-4</div>
-            <div><div style="font-size:13px; font-weight:600; color:var(--c5);">발표 자료 제출 마감</div><div style="font-size:12px; color:var(--c2); margin-top:2px;">이메일 또는 공유 드라이브 업로드</div></div>
-          </div>
-          <div style="display:flex; align-items:flex-start; gap:20px; padding:12px 0; border-bottom:1px solid var(--c1);">
-            <div style="min-width:44px; font-size:11px; font-weight:700; color:var(--c3); padding-top:2px;">D-1</div>
-            <div><div style="font-size:13px; font-weight:500; color:var(--c5);">리허설 — 오후 4시, 4층 4C</div></div>
-          </div>
-          <div style="display:flex; align-items:flex-start; gap:20px; padding:12px 0;">
-            <div style="min-width:44px; font-size:11px; font-weight:700; color:var(--c5); padding-top:2px;">D-Day</div>
-            <div><div style="font-size:13px; font-weight:500; color:var(--c5);">시작 15분 전 입장, 마이크 테스트</div></div>
-          </div>
-        </div>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-        <div class="card" style="padding:20px;">
-          <div class="section-title">유의사항</div>
-          <div style="font-size:12px; color:var(--c3); line-height:2.1;">슬라이드 비율 16:9<br>발표 시간 엄수<br>영상 파일 별도 제출<br>외부 기밀 자료 포함 불가<br>발표자 변경 시 사전 공지</div>
-        </div>
-        <div class="card" style="padding:20px;">
-          <div class="section-title">자료 제출</div>
-          <div style="font-size:12px; color:var(--c3); line-height:2.1;">이메일: anbang@sidiz.com<br>드라이브: 앉방데이 / 2025 / 해당월<br>슬랙: #앉방데이-자료제출</div>
-          <div style="margin-top:12px; font-size:11px; color:var(--c2);">파일명: [유형]_[이름]_[제목].pptx</div>
-        </div>
-      </div>
+<!-- ══════════════════════════════════
+     섹션 2 — 행사 안내
+══════════════════════════════════ -->
+<div class="sec-divider"></div>
+<section id="sec-event">
+  <div class="inner">
+    <div class="sec-eyebrow">행사 안내</div>
+    <div class="sec-title" id="event-title">앉방데이 안내</div>
+    <div class="sec-sub" id="event-sub"></div>
+    <div class="theme-box" id="event-theme-box" style="display:none;">
+      <div class="theme-label">이달의 테마</div>
+      <div class="theme-title" id="event-theme-title"></div>
+    </div>
+    <div id="event-pres-list" class="pres-list">
+      <div class="pres-item"><span style="color:var(--w3);font-size:13px;">불러오는 중...</span></div>
     </div>
   </div>
+</section>
 
-  <!-- ======================== 지난 앉방데이 ======================== -->
-  <div id="page-story" class="page">
-    <div style="padding:40px 48px; max-width:860px;">
-      <div style="margin-bottom:24px;">
-        <h1 style="font-size:24px; font-weight:700; color:var(--c5); letter-spacing:-0.3px;">지난 앉방데이</h1>
-      </div>
-      <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
-        <input id="q" oninput="filterStory()" placeholder="발표 제목, 발표자, 팀 이름으로 검색"
-          style="flex:1; min-width:180px; border:1px solid var(--c1); border-radius:6px; padding:9px 14px; font-size:13px; font-family:inherit; color:var(--c5); outline:none; background:#fff;" />
-        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-          <button class="tab active" onclick="switchTab('events',this)">앉방데이</button>
-          <button class="tab" onclick="switchTab('presentations',this)">발표</button>
-          <button class="tab" onclick="switchTab('aicando',this)">AI CAN DO</button>
-          <button class="tab" onclick="switchTab('hosts',this)">앉방마님</button>
-        </div>
-      </div>
-      <div id="story-events"><div id="events-grid" style="display:grid; gap:8px;"></div></div>
-      <div id="story-presentations" style="display:none;"><div class="card" id="pres-list"></div></div>
-      <div id="story-aicando" style="display:none;"><div class="card" id="aicando-list"></div></div>
-      <div id="story-hosts" style="display:none;"><div class="card" id="hosts-list"></div></div>
+<!-- ══════════════════════════════════
+     섹션 3 — 지난 앉방데이
+══════════════════════════════════ -->
+<div class="sec-divider"></div>
+<section id="sec-story">
+  <div class="inner">
+    <div class="sec-eyebrow">아카이브</div>
+    <div class="sec-title" style="margin-bottom:32px;">지난 앉방데이</div>
+    <input class="story-search" id="q" oninput="filterStory()" placeholder="발표 제목, 발표자, 팀 이름으로 검색"/>
+    <div class="story-tabs">
+      <button class="s-tab active" onclick="switchTab('events',this)">앉방데이</button>
+      <button class="s-tab" onclick="switchTab('presentations',this)">발표</button>
+      <button class="s-tab" onclick="switchTab('aicando',this)">AI CAN DO</button>
+      <button class="s-tab" onclick="switchTab('hosts',this)">앉방마님</button>
     </div>
+    <div id="story-events" class="story-panel active"><div class="event-rows" id="events-grid"></div></div>
+    <div id="story-presentations" class="story-panel"><div class="pres-rows" id="pres-list"></div></div>
+    <div id="story-aicando" class="story-panel"><div class="pres-rows" id="aicando-list"></div></div>
+    <div id="story-hosts" class="story-panel"><div class="host-rows" id="hosts-list"></div></div>
   </div>
+</section>
 
-  <!-- ======================== 진행 및 운영 ======================== -->
-  <div id="page-admin" class="page">
-    <!-- 로그인 화면 -->
-    <div id="admin-login" style="display:flex; align-items:center; justify-content:center; min-height:100vh;">
-      <div class="card" style="padding:36px; width:320px; text-align:center;">
-        <div style="font-size:16px; font-weight:700; color:var(--c5); margin-bottom:6px;">진행 및 운영</div>
-        <div style="font-size:13px; color:var(--c3); margin-bottom:24px;">운영팀 전용 페이지입니다</div>
-        <input type="password" id="admin-pw" class="form-input" placeholder="패스워드 입력" style="margin-bottom:10px; text-align:center;" onkeydown="if(event.key==='Enter') checkPw()" />
-        <button class="btn btn-primary" style="width:100%;" onclick="checkPw()">입장</button>
-        <div id="pw-error" style="font-size:12px; color:#991b1b; margin-top:8px; display:none;">패스워드가 올바르지 않습니다</div>
+<!-- ══════════════════════════════════
+     섹션 4 — 발표자 가이드
+══════════════════════════════════ -->
+<div class="sec-divider"></div>
+<section id="sec-presenter">
+  <div class="inner">
+    <div class="sec-eyebrow">발표자 안내</div>
+    <div class="sec-title">발표 준비 가이드</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px;margin-bottom:8px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--c3);line-height:1.6;">
+        <span style="font-size:11px;font-weight:700;color:var(--c2);min-width:16px;padding-top:2px;">1</span>
+        <span>꼭 정해진 시간 안에 발표를 진행해주세요.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--c3);line-height:1.6;">
+        <span style="font-size:11px;font-weight:700;color:var(--c2);min-width:16px;padding-top:2px;">2</span>
+        <span>핵심만 담아 간결하게 준비해주세요.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--c3);line-height:1.6;">
+        <span style="font-size:11px;font-weight:700;color:var(--c2);min-width:16px;padding-top:2px;">3</span>
+        <span>사업부·연구소 모두 이해할 수 있도록 쉬운 언어로 준비해주세요.</span>
       </div>
     </div>
-
-    <!-- 관리 화면 -->
-    <div id="admin-panel" style="display:none;">
-      <div style="background:var(--c5); padding:24px 48px;">
-        <div style="max-width:920px; display:flex; align-items:center; justify-content:space-between;">
-          <div>
-            <div style="font-size:11px; color:var(--c3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">운영자</div>
-            <div style="font-size:20px; font-weight:700; color:#fff;">진행 및 운영</div>
+    <!-- 발표 유형 아코디언 -->
+    <div class="guide-cards">
+      <div class="guide-card" onclick="toggleGuide(this)">
+        <div class="guide-card-header">
+          <div class="guide-card-header-left">
+            <div class="guide-card-type">Type 01</div>
+            <div class="guide-card-name">실무 발표</div>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="logout()">로그아웃</button>
+          <div class="guide-card-chevron">▾</div>
+        </div>
+        <div class="guide-card-body">
+          <div class="guide-card-meta"><span class="guide-card-meta-tag">10–20분</span><span class="guide-card-meta-tag">형식 자유</span><span class="guide-card-meta-tag">협의 가능</span></div>
+          <div class="guide-card-desc">프로젝트 경험, 협업 이야기, 업무 개선 사례 등 자유 형식으로 나누는 발표입니다. 발표 길이와 형식은 운영팀과 협의 가능합니다.</div>
         </div>
       </div>
-
-      <div style="padding:28px 48px; max-width:920px;">
-        <!-- 관리 탭 -->
-        <div style="display:flex; gap:6px; margin-bottom:24px; border-bottom:1px solid var(--c1); padding-bottom:0;">
-          <button class="tab active" style="border-radius:6px 6px 0 0; padding-bottom:12px;" onclick="switchAdminTab('events',this)">행사 관리</button>
-          <button class="tab" style="border-radius:6px 6px 0 0; padding-bottom:12px;" onclick="switchAdminTab('presentations',this)">발표 관리</button>
-          <button class="tab" style="border-radius:6px 6px 0 0; padding-bottom:12px;" onclick="switchAdminTab('hosts',this)">앉방마님 관리</button>
-          <button class="tab" style="border-radius:6px 6px 0 0; padding-bottom:12px;" onclick="switchAdminTab('people',this)">인물-팀 관리</button>
-        </div>
-
-        <!-- 행사 관리 -->
-        <div id="admin-events">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-            <div class="section-title" style="margin-bottom:0;">행사 목록</div>
-            <button class="btn btn-primary btn-sm" onclick="openModal('event-modal')">+ 행사 추가</button>
+      <div class="guide-card" onclick="toggleGuide(this)">
+        <div class="guide-card-header">
+          <div class="guide-card-header-left">
+            <div class="guide-card-type">Type 02</div>
+            <div class="guide-card-name">AI CAN DO</div>
           </div>
-          <div style="display:grid; grid-template-columns:280px 1fr; gap:16px; align-items:start;">
-            <!-- 행사 리스트 (좌) -->
-            <div class="card" style="overflow:hidden;">
-              <div id="admin-events-list" style="display:flex; flex-direction:column;"></div>
+          <div class="guide-card-chevron">▾</div>
+        </div>
+        <div class="guide-card-body">
+          <div class="guide-card-meta"><span class="guide-card-meta-tag">15분 발표</span><span class="guide-card-meta-tag">화면 시연 가능</span><span class="guide-card-meta-tag">직군 무관</span></div>
+          <div class="guide-card-desc">AI 도구를 실무에 적용한 경험을 나누는 발표입니다. 어떤 도구를, 어떤 상황에, 어떻게 썼는지를 중심으로 구성해주세요. 이론보다 실제 사례 위주가 훨씬 좋습니다.</div>
+        </div>
+      </div>
+      <div class="guide-card" onclick="toggleGuide(this)">
+        <div class="guide-card-header">
+          <div class="guide-card-header-left">
+            <div class="guide-card-type">Type 03</div>
+            <div class="guide-card-name">KGI 발표</div>
+          </div>
+          <div class="guide-card-chevron">▾</div>
+        </div>
+        <div class="guide-card-body">
+          <div class="guide-card-meta"><span class="guide-card-meta-tag">10–15분</span><span class="guide-card-meta-tag">데이터 중심</span><span class="guide-card-meta-tag">슬라이드 10장↓</span></div>
+          <div class="guide-card-desc">분기 핵심 성과 지표를 공유하는 팀 발표입니다. 팀장 또는 리더가 주도하며, 수치 기반으로 분기 성과를 정리하고 다음 분기 방향성까지 담는 것을 권장합니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="submit-row">
+      <div class="submit-card">
+        <div class="submit-card-title">유의사항</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="guide-card-meta-tag">PPT</span>
+            <span class="guide-card-meta-tag">PDF</span>
+            <span class="guide-card-meta-tag">HTML</span>
+            <span style="font-size:12px;color:var(--c2);align-self:center;">파일만 허용</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="guide-card-meta-tag">폰트 크기 20pt 이상</span>
+            <span class="guide-card-meta-tag">저채도 색상 사용 지양</span>
+          </div>
+          <div style="font-size:12px;color:var(--c3);padding-top:4px;border-top:1px solid var(--c1);line-height:1.8;">
+            기본 폰트&nbsp;&nbsp;
+            <span style="color:var(--c5);font-weight:600;">국문 Pretendard</span>
+            &nbsp;/&nbsp;
+            <span style="color:var(--c5);font-weight:600;">영문 Centra No.2</span>
+          </div>
+        </div>
+      </div>
+      <div class="submit-card">
+        <div class="submit-card-title">자료 제출</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--c3);">
+              <span style="font-size:11px;font-weight:700;color:var(--c2);min-width:14px;padding-top:1px;">1</span>
+              <span>PPT 자료 제출 시 <strong style="color:var(--c5);font-weight:600;">폰트 포함 저장</strong></span>
             </div>
-            <!-- 행사 상세 (우) -->
-            <div id="event-detail-panel" class="card" style="padding:24px; display:none;">
-              <div id="event-detail-content"></div>
+            <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--c3);">
+              <span style="font-size:11px;font-weight:700;color:var(--c2);min-width:14px;padding-top:1px;">2</span>
+              <span>드라이브 접속 후 해당 월 폴더 선택</span>
             </div>
-            <div id="event-detail-empty" style="display:flex; align-items:center; justify-content:center; color:var(--c2); font-size:13px; padding:40px;">
-              ← 행사를 선택하면 상세 내용을 볼 수 있어요
+            <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--c3);">
+              <span style="font-size:11px;font-weight:700;color:var(--c2);min-width:14px;padding-top:1px;">3</span>
+              <span>파일명 확인 후 업로드</span>
             </div>
           </div>
+          <div style="background:var(--c0);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--c3);line-height:1.8;">
+            <span style="font-weight:600;color:var(--c5);">파일명</span>&nbsp; TYPE_이름_제목<br>
+            <span style="color:var(--c2);">TYPE: 실무발표 / AI CAN DO / KGI발표</span>
+          </div>
+          <a id="drive-link-btn" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--c4);color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;width:fit-content;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            드라이브 바로가기
+          </a>
         </div>
-
-        <!-- 발표 관리 -->
-        <div id="admin-presentations" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-            <div class="section-title" style="margin-bottom:0;">발표 목록</div>
-            <button class="btn btn-primary btn-sm" onclick="openModal('pres-modal')">+ 발표 추가</button>
+      </div>
+    </div>
+    <div class="schedule-list" style="margin-top:32px;">
+      <div class="schedule-item highlight">
+        <div class="schedule-day">D-7</div>
+        <div><div class="schedule-content-title">발표 자료 제출 마감</div><div class="schedule-content-sub">공유 드라이브 업로드</div></div>
+      </div>
+      <div class="schedule-item">
+        <div class="schedule-day">D-Day</div>
+        <div>
+          <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px;">
+            <span style="font-size:11px;font-weight:600;color:var(--c2);min-width:80px;">08:30 – 09:00</span>
+            <div class="schedule-content-title">자리 세팅</div>
           </div>
-          <div class="card" style="overflow:hidden;">
-            <table>
-              <thead><tr><th>월</th><th>발표 제목</th><th>발표자</th><th>유형</th><th>시간</th><th></th></tr></thead>
-              <tbody id="admin-pres-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 앉방마님 관리 -->
-        <div id="admin-hosts" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-            <div class="section-title" style="margin-bottom:0;">앉방마님 명단</div>
-            <button class="btn btn-primary btn-sm" onclick="openModal('host-modal')">+ 명단 추가</button>
-          </div>
-          <div class="card" style="overflow:hidden;">
-            <table>
-              <thead><tr><th>행사</th><th>날짜</th><th>명단</th><th></th></tr></thead>
-              <tbody id="admin-hosts-body"><tr><td colspan="4" class="loading">불러오는 중...</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 인물-팀 관리 -->
-        <div id="admin-people" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <div class="section-title" style="margin-bottom:0;">인물-팀 매칭</div>
-              <div style="display:flex; gap:4px;">
-                <button class="btn btn-ghost btn-sm" onclick="sortPeople('name')" id="sort-name">이름 ↕</button>
-                <button class="btn btn-ghost btn-sm" onclick="sortPeople('team')" id="sort-team">팀 ↕</button>
-                <button class="btn btn-ghost btn-sm" onclick="sortPeople('title')" id="sort-title">직함 ↕</button>
-              </div>
+          <div style="display:flex;align-items:baseline;gap:12px;">
+            <span style="font-size:11px;font-weight:600;color:var(--c2);min-width:80px;">09:00 – 09:45</span>
+            <div>
+              <div class="schedule-content-title">리허설</div>
+              <div class="schedule-content-sub">자료 확인, 마이크 테스트</div>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="openModal('people-modal')">+ 인물 추가</button>
-          </div>
-          <div class="card" style="overflow:hidden;">
-            <table>
-              <thead><tr><th>이름</th><th>팀</th><th>직함</th><th>앉방마님</th><th>발표</th><th></th></tr></thead>
-              <tbody id="admin-people-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody>
-            </table>
           </div>
         </div>
       </div>
     </div>
   </div>
+</section>
 
-</div><!-- /main -->
+<!-- ══════════════════════════════════
+     운영관리 오버레이
+══════════════════════════════════ -->
+<div id="admin-overlay">
+  <div class="admin-topbar">
+    <button class="admin-back" onclick="closeAdmin()">← 돌아가기</button>
+    <div class="admin-topbar-title">진행 및 운영</div>
+    <div style="width:80px;"></div>
+  </div>
 
-<!-- ======================== MODALS ======================== -->
+  <!-- 로그인 -->
+  <div id="admin-login" style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 56px);">
+    <div class="card" style="padding:36px;width:320px;text-align:center;">
+      <div style="font-size:16px;font-weight:700;color:var(--c5);margin-bottom:6px;">운영팀 전용</div>
+      <div style="font-size:13px;color:var(--c3);margin-bottom:24px;">패스워드를 입력해주세요</div>
+      <input type="password" id="admin-pw" class="form-input" placeholder="패스워드" style="margin-bottom:10px;text-align:center;" onkeydown="if(event.key==='Enter')checkPw()"/>
+      <button class="btn btn-primary" style="width:100%;" onclick="checkPw()">입장</button>
+      <div id="pw-error" style="font-size:12px;color:#991b1b;margin-top:8px;display:none;">패스워드가 올바르지 않습니다</div>
+    </div>
+  </div>
 
-<!-- 행사 추가/수정 -->
+  <!-- 관리 패널 -->
+  <div id="admin-panel" style="display:none;">
+    <div style="background:var(--c5);padding:20px 48px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:16px;font-weight:700;color:#fff;">운영관리 대시보드</div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">로그아웃</button>
+    </div>
+    <div style="padding:28px 48px;max-width:1000px;">
+      <div style="display:flex;gap:6px;margin-bottom:24px;border-bottom:1px solid var(--c1);padding-bottom:0;">
+        <button class="tab active" style="border-radius:6px 6px 0 0;padding-bottom:12px;" onclick="switchAdminTab('events',this)">행사 관리</button>
+        <button class="tab" style="border-radius:6px 6px 0 0;padding-bottom:12px;" onclick="switchAdminTab('presentations',this)">발표 관리</button>
+        <button class="tab" style="border-radius:6px 6px 0 0;padding-bottom:12px;" onclick="switchAdminTab('hosts',this)">앉방마님 관리</button>
+        <button class="tab" style="border-radius:6px 6px 0 0;padding-bottom:12px;" onclick="switchAdminTab('people',this)">인물-팀 관리</button>
+        <button class="tab" style="border-radius:6px 6px 0 0;padding-bottom:12px;" onclick="switchAdminTab('settings',this)">설정</button>
+      </div>
+
+      <!-- 행사 관리 -->
+      <div id="admin-events">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="section-title" style="margin-bottom:0;">행사 목록</div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('event-modal')">+ 행사 추가</button>
+        </div>
+        <div style="display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start;">
+          <div class="card" style="overflow:hidden;"><div id="admin-events-list" style="display:flex;flex-direction:column;"></div></div>
+          <div id="event-detail-panel" class="card" style="padding:24px;display:none;"><div id="event-detail-content"></div></div>
+          <div id="event-detail-empty" style="display:flex;align-items:center;justify-content:center;color:var(--c2);font-size:13px;padding:40px;">← 행사를 선택하면 상세 내용을 볼 수 있어요</div>
+        </div>
+      </div>
+
+      <!-- 발표 관리 -->
+      <div id="admin-presentations" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="section-title" style="margin-bottom:0;">발표 목록</div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('pres-modal')">+ 발표 추가</button>
+        </div>
+        <div class="card" style="overflow:hidden;">
+          <table><thead><tr><th>월</th><th>발표 제목</th><th>발표자</th><th>유형</th><th>시간</th><th></th></tr></thead>
+          <tbody id="admin-pres-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- 앉방마님 관리 -->
+      <div id="admin-hosts" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="section-title" style="margin-bottom:0;">앉방마님 명단</div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('host-modal')">+ 명단 추가</button>
+        </div>
+        <div class="card" style="overflow:hidden;">
+          <table><thead><tr><th>행사</th><th>날짜</th><th>명단</th><th></th></tr></thead>
+          <tbody id="admin-hosts-body"><tr><td colspan="4" class="loading">불러오는 중...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- 인물-팀 관리 -->
+      <div id="admin-people" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="section-title" style="margin-bottom:0;">인물-팀 매칭</div>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-ghost btn-sm" onclick="sortPeople('name')" id="sort-name">이름 ↕</button>
+              <button class="btn btn-ghost btn-sm" onclick="sortPeople('team')" id="sort-team">팀 ↕</button>
+              <button class="btn btn-ghost btn-sm" onclick="sortPeople('title')" id="sort-title">직함 ↕</button>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('people-modal')">+ 인물 추가</button>
+        </div>
+        <div class="card" style="overflow:hidden;">
+          <table><thead><tr><th>이름</th><th>팀</th><th>직함</th><th>앉방마님</th><th>발표</th><th></th></tr></thead>
+          <tbody id="admin-people-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- 설정 -->
+      <div id="admin-settings" style="display:none;">
+        <div style="max-width:480px;">
+          <div class="section-title" style="margin-bottom:16px;">전역 설정</div>
+          <div class="card" style="padding:24px;">
+            <div class="form-group">
+              <label class="form-label">자료 제출 드라이브 링크</label>
+              <input class="form-input" id="setting-drive-url" placeholder="https://drive.google.com/..." />
+              <div style="font-size:11px;color:var(--c2);margin-top:6px;">발표자 가이드 페이지에 표시되는 드라이브 바로가기 링크</div>
+            </div>
+            <button class="btn btn-primary" onclick="saveSetting('drive_url','setting-drive-url')">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 모달들 ══ -->
 <div class="modal-bg" id="event-modal">
   <div class="modal">
     <div class="modal-title" id="event-modal-title">행사 추가</div>
-    <input type="hidden" id="em-id" />
-    <div class="form-group"><label class="form-label">월 (예: 2025.05)</label><input class="form-input" id="em-month" placeholder="2025.05" /></div>
-    <div class="form-group"><label class="form-label">테마</label><input class="form-input" id="em-theme" placeholder="이달의 테마" /></div>
-    <div class="form-group"><label class="form-label">날짜 (예: 5월 30일 (금))</label><input class="form-input" id="em-date" placeholder="5월 30일 (금)" /></div>
-    <div class="form-group"><label class="form-label">시간</label><input class="form-input" id="em-time" placeholder="15:00 – 17:30" value="15:00 – 17:30" /></div>
-    <div class="form-group"><label class="form-label">장소</label><input class="form-input" id="em-location" placeholder="본사 4층 4C" value="본사 4층 4C" /></div>
-    <div class="form-group"><label class="form-label">앉방마님 팀</label><input class="form-input" id="em-host-team" placeholder="사업운영팀" /></div>
-    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">
+    <input type="hidden" id="em-id"/>
+    <div class="form-group"><label class="form-label">월 (예: 2025.05)</label><input class="form-input" id="em-month" placeholder="2025.05"/></div>
+    <div class="form-group"><label class="form-label">테마</label><input class="form-input" id="em-theme" placeholder="이달의 테마"/></div>
+    <div class="form-group"><label class="form-label">날짜 (예: 5월 30일 (금))</label><input class="form-input" id="em-date" placeholder="5월 30일 (금)"/></div>
+    <div class="form-group"><label class="form-label">시간</label><input class="form-input" id="em-time" placeholder="15:00 – 17:30" value="15:00 – 17:30"/></div>
+    <div class="form-group"><label class="form-label">장소</label><input class="form-input" id="em-location" placeholder="본사 4층 4C" value="본사 4층 4C"/></div>
+    <div class="form-group"><label class="form-label">앉방마님 팀</label><input class="form-input" id="em-host-team" placeholder="사업운영팀"/></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
       <button class="btn btn-ghost" onclick="closeModal('event-modal')">취소</button>
       <button class="btn btn-primary" onclick="saveEvent()">저장</button>
     </div>
   </div>
 </div>
 
-<!-- 발표 추가/수정 -->
 <div class="modal-bg" id="pres-modal">
   <div class="modal">
     <div class="modal-title" id="pres-modal-title">발표 추가</div>
-    <input type="hidden" id="pm-id" />
-    <div class="form-group"><label class="form-label">행사 월</label>
-      <select class="form-select" id="pm-month"></select>
-    </div>
-    <div class="form-group"><label class="form-label">발표 제목</label><input class="form-input" id="pm-title" placeholder="발표 제목" /></div>
-    <div class="form-group"><label class="form-label">발표자 (복수 시 콤마 구분)</label><input class="form-input" id="pm-presenter" placeholder="홍길동, 김철수" /></div>
+    <input type="hidden" id="pm-id"/>
+    <div class="form-group"><label class="form-label">행사 월</label><select class="form-select" id="pm-month"></select></div>
+    <div class="form-group"><label class="form-label">발표 제목</label><input class="form-input" id="pm-title" placeholder="발표 제목"/></div>
+    <div class="form-group"><label class="form-label">발표자 (복수 시 콤마 구분)</label><input class="form-input" id="pm-presenter" placeholder="홍길동, 김철수"/></div>
     <div class="form-group"><label class="form-label">유형</label>
       <select class="form-select" id="pm-type">
-        <option value="KGI">KGI</option>
-        <option value="AI CAN DO">AI CAN DO</option>
-        <option value="실무공유">실무공유</option>
-        <option value="전략">전략</option>
-        <option value="마케팅">마케팅</option>
-        <option value="VOC">VOC</option>
-        <option value="기타">기타</option>
+        <option value="KGI">KGI</option><option value="AI CAN DO">AI CAN DO</option>
+        <option value="실무공유">실무공유</option><option value="전략">전략</option>
+        <option value="마케팅">마케팅</option><option value="VOC">VOC</option><option value="기타">기타</option>
       </select>
     </div>
-    <div class="form-group"><label class="form-label">발표 시간 (분)</label><input class="form-input" id="pm-duration" type="number" placeholder="15" /></div>
-    <div class="form-group"><label class="form-label">순서</label><input class="form-input" id="pm-order" type="number" placeholder="1" /></div>
-    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">
+    <div class="form-group"><label class="form-label">발표 시간 (분)</label><input class="form-input" id="pm-duration" type="number" placeholder="15"/></div>
+    <div class="form-group"><label class="form-label">순서</label><input class="form-input" id="pm-order" type="number" placeholder="1"/></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
       <button class="btn btn-ghost" onclick="closeModal('pres-modal')">취소</button>
       <button class="btn btn-primary" onclick="savePresentation()">저장</button>
     </div>
   </div>
 </div>
 
-<!-- 앉방마님 추가/수정 -->
 <div class="modal-bg" id="host-modal">
   <div class="modal">
     <div class="modal-title" id="host-modal-title">앉방마님 추가</div>
-    <input type="hidden" id="hm-id" />
-    <div class="form-group"><label class="form-label">행사 월</label>
-      <select class="form-select" id="hm-month" onchange="refreshHostPeopleSelect()"></select>
-    </div>
+    <input type="hidden" id="hm-id"/>
+    <div class="form-group"><label class="form-label">행사 월</label><select class="form-select" id="hm-month" onchange="refreshHostPeopleSelect()"></select></div>
     <div class="form-group">
-      <label class="form-label">명단 선택 <span style="font-weight:400;color:var(--c2);">(인물-팀 관리에서 등록된 인원)</span></label>
+      <label class="form-label">명단 선택</label>
       <div id="hm-people-checkboxes" style="border:1px solid var(--c1);border-radius:6px;max-height:200px;overflow-y:auto;padding:8px 12px;background:#fff;display:grid;gap:4px;"></div>
     </div>
-    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
       <button class="btn btn-ghost" onclick="closeModal('host-modal')">취소</button>
       <button class="btn btn-primary" onclick="saveHost()">저장</button>
     </div>
   </div>
 </div>
 
-<!-- 인물 추가/수정 -->
 <div class="modal-bg" id="people-modal">
   <div class="modal">
     <div class="modal-title" id="people-modal-title">인물 추가</div>
-    <input type="hidden" id="ppm-id" />
-    <div class="form-group"><label class="form-label">이름</label><input class="form-input" id="ppm-name" placeholder="홍길동" /></div>
-    <div class="form-group"><label class="form-label">팀</label><input class="form-input" id="ppm-team" placeholder="사업운영팀" /></div>
-    <div class="form-group"><label class="form-label">직함 (선택)</label><input class="form-input" id="ppm-title" placeholder="팀장" /></div>
-    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">
+    <input type="hidden" id="ppm-id"/>
+    <div class="form-group"><label class="form-label">이름</label><input class="form-input" id="ppm-name" placeholder="홍길동"/></div>
+    <div class="form-group"><label class="form-label">팀</label><input class="form-input" id="ppm-team" placeholder="사업운영팀"/></div>
+    <div class="form-group"><label class="form-label">직함 (선택)</label><input class="form-input" id="ppm-title" placeholder="팀장"/></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
       <button class="btn btn-ghost" onclick="closeModal('people-modal')">취소</button>
       <button class="btn btn-primary" onclick="savePerson()">저장</button>
     </div>
@@ -441,706 +646,490 @@ tr:hover td { background: var(--c0); }
 </div>
 
 <script>
-// ── Supabase 초기화 ──
+// ── Supabase ──
 const { createClient } = supabase;
 const sb = createClient(
   'https://dvlrzbckneucpvlacdll.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2bHJ6YmNrbmV1Y3B2bGFjZGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5ODE0OTUsImV4cCI6MjA5MDU1NzQ5NX0.ofzGfyjndiT-FAIcG9TCFtUSXsagTBYOnhsP91vx0sE'
 );
-
-// ── 상수 ──
-const ADMIN_PW = '1234';  // 패스워드 여기서 변경
-
-// ── 캐시 ──
-let cache = { events: [], presentations: [], hosts: [], people: [] };
-let peopleMap = {};  // 이름 → {team, title}
+const ADMIN_PW = '1234';
+let cache = { events:[], presentations:[], hosts:[], people:[] };
+let peopleMap = {};
 
 // ── 유틸 ──
-function fmtMonth(m) {
-  if (!m) return '';
-  const [y, mo] = m.split('.');
-  return y.slice(2) + '년 ' + parseInt(mo) + '월 앉방데이';
+function fmtMonth(m){
+  if(!m) return '';
+  const [y,mo]=m.split('.');
+  return y.slice(2)+'년 '+parseInt(mo)+'월 앉방데이';
 }
-
-function withTeam(nameStr) {
-  if (!nameStr) return '';
-  return nameStr.split(',').map(n => {
-    const name = n.trim();
-    const info = peopleMap[name];
-    return info
-      ? `${name}<span style="font-size:11px;color:var(--c2);margin-left:4px;">(${info.team})</span>`
-      : name;
+function withTeam(nameStr){
+  if(!nameStr) return '';
+  return nameStr.split(',').map(n=>{
+    const name=n.trim();
+    const info=peopleMap[name];
+    return info?`${name}<span class="team-hint">(${info.team})</span>`:name;
   }).join(', ');
 }
 
 // ── 데이터 로드 ──
-async function loadAll() {
-  const [ev, pr, ho, pe] = await Promise.all([
-    sb.from('anbang_events').select('*').order('month', { ascending: false }),
+async function loadAll(){
+  const [ev,pr,ho,pe,st]=await Promise.all([
+    sb.from('anbang_events').select('*').order('month',{ascending:false}),
     sb.from('anbang_presentations').select('*').order('order_num'),
     sb.from('anbang_hosts').select('*').order('order_num'),
     sb.from('anbang_people').select('*').order('name'),
+    sb.from('anbang_settings').select('*'),
   ]);
-  cache.events       = ev.data || [];
-  cache.presentations = pr.data || [];
-  cache.hosts        = ho.data || [];
-  cache.people       = pe.data || [];
-  peopleMap = {};
-  cache.people.forEach(p => { peopleMap[p.name] = { team: p.team, title: p.title }; });
+  cache.events=ev.data||[];
+  cache.presentations=pr.data||[];
+  cache.hosts=ho.data||[];
+  cache.people=pe.data||[];
+  cache.settings={};
+  (st.data||[]).forEach(s=>{cache.settings[s.key]=s.value;});
+  peopleMap={};
+  cache.people.forEach(p=>{peopleMap[p.name]={team:p.team,title:p.title};});
+  // 드라이브 링크 적용
+  const driveBtn=document.getElementById('drive-link-btn');
+  if(driveBtn&&cache.settings.drive_url) driveBtn.href=cache.settings.drive_url;
 }
 
-// ── 네비게이션 ──
-async function go(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + page + "'")) n.classList.add('active');
-  });
-  if (page === 'home')      renderHome();
-  if (page === 'event')     renderEvent();
-  if (page === 'story')     renderStory();
-  if (page === 'admin')     initAdmin();
+// ── 스크롤 네비 ──
+function scrollToSec(id){
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
 }
 
-// ── 홈 ──
-async function renderHome() {
-  if (!cache.events.length) await loadAll();
-  const latest = cache.events[0];
-  if (!latest) return;
+// ── 메뉴 ──
+function openMenu(){ document.getElementById('menu-overlay').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeMenu(){ document.getElementById('menu-overlay').classList.remove('open'); document.body.style.overflow=''; }
+function menuGo(sec){ closeMenu(); setTimeout(()=>scrollToSec(sec),300); }
 
-  const [y, mo] = latest.month.split('.');
-  const dday = Math.ceil((new Date(latest.date_raw || '2025-04-25') - new Date()) / 86400000);
-  const ddayStr = dday > 0 ? `D-${dday}` : dday === 0 ? 'D-Day' : '종료';
+// 로고 길게 누르기 → 관리자
+(function(){
+  const logo = document.getElementById('nav-logo');
+  let timer;
+  logo.addEventListener('mousedown', ()=>{ timer=setTimeout(()=>{ openAdmin(); },800); });
+  logo.addEventListener('mouseup', ()=>clearTimeout(timer));
+  logo.addEventListener('mouseleave', ()=>clearTimeout(timer));
+  logo.addEventListener('touchstart', ()=>{ timer=setTimeout(()=>{ openAdmin(); },800); },{passive:true});
+  logo.addEventListener('touchend', ()=>clearTimeout(timer));
+  logo.addEventListener('contextmenu', e=>e.preventDefault());
+})();
 
-  document.getElementById('home-meta').textContent = `${y}년 ${parseInt(mo)}월 · ${ddayStr}`;
-  document.getElementById('home-title').textContent = `시디즈 앉방데이 ${parseInt(mo)}월`;
-  document.getElementById('home-theme').textContent = latest.theme || '';
-  document.getElementById('nav-event-label').textContent = `${parseInt(mo)}월 앉방데이 안내`;
+// ESC로 메뉴 닫기
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeMenu(); closeAdmin(); } });
 
-  document.getElementById('home-cards').innerHTML = `
-    <div class="card" style="padding:20px;">
-      <div style="font-size:11px;color:var(--c2);margin-bottom:6px;">일시</div>
-      <div style="font-size:14px;font-weight:600;color:var(--c5);">${latest.date || '—'}</div>
-      <div style="font-size:12px;color:var(--c3);margin-top:2px;">${latest.time_range || ''}</div>
-    </div>
-    <div class="card" style="padding:20px;">
-      <div style="font-size:11px;color:var(--c2);margin-bottom:6px;">장소</div>
-      <div style="font-size:14px;font-weight:600;color:var(--c5);">${latest.location || '—'}</div>
-    </div>
-    <div class="card" style="padding:20px;">
-      <div style="font-size:11px;color:var(--c2);margin-bottom:6px;">앉방마님</div>
-      <div style="font-size:14px;font-weight:600;color:var(--c5);">${latest.host_team || '—'}</div>
-      <div style="font-size:12px;color:var(--c3);margin-top:2px;">${getHostNames(latest.month)}</div>
-    </div>
-  `;
+// 스크롤 이벤트 - 네비 배경 + active
+window.addEventListener('scroll',()=>{
+  const nav=document.getElementById('nav');
+  nav.classList.toggle('scrolled',window.scrollY>60);
+});
+
+// ── 홈 렌더 ──
+async function renderHome(){
+  if(!cache.events.length) await loadAll();
+  const e=cache.events[0];
+  if(!e) return;
+  const [y,mo]=e.month.split('.');
+
+  if(e.theme) document.getElementById('home-theme').textContent=e.theme;
+  document.getElementById('hc-date').textContent=e.date||'—';
+  document.getElementById('hc-time').textContent=e.time_range||'';
+  document.getElementById('hc-location').textContent=e.location||'—';
+  document.getElementById('hc-host').textContent=e.host_team||'—';
+  const hosts=cache.hosts.filter(h=>h.event_month===e.month);
+  const lead=hosts.find(h=>h.is_lead);
+  const others=hosts.filter(h=>!h.is_lead);
+  let hnames='';
+  if(lead) hnames=lead.name+(others.length?` 외 ${others.length}인`:'');
+  document.getElementById('hc-host-names').textContent=hnames;
 }
 
-function getHostNames(month) {
-  const hosts = cache.hosts.filter(h => h.event_month === month);
-  if (!hosts.length) return '';
-  const lead = hosts.find(h => h.is_lead);
-  const others = hosts.filter(h => !h.is_lead);
-  let parts = [];
-  if (lead) parts.push(lead.name + ' (리드)');
-  if (others.length) parts.push(`외 ${others.length}인`);
-  return parts.join(' ');
-}
-
-// ── 행사 안내 ──
-async function renderEvent() {
-  if (!cache.events.length) await loadAll();
-  const latest = cache.events[0];
-  if (!latest) return;
-
-  const [y, mo] = latest.month.split('.');
-  document.getElementById('event-title').textContent = `${parseInt(mo)}월 앉방데이`;
-  document.getElementById('event-sub').textContent = `${latest.date || ''} ${latest.time_range || ''} · ${latest.location || ''}`;
-
-  if (latest.theme) {
-    document.getElementById('event-theme-box').style.display = '';
-    document.getElementById('event-theme-title').textContent = latest.theme;
+// ── 행사 안내 렌더 ──
+async function renderEvent(){
+  if(!cache.events.length) await loadAll();
+  const e=cache.events[0];
+  if(!e) return;
+  const [y,mo]=e.month.split('.');
+  document.getElementById('event-title').textContent=`${parseInt(mo)}월 앉방데이`;
+  document.getElementById('event-sub').textContent=`${e.date||''} ${e.time_range||''} · ${e.location||''}`;
+  if(e.theme){
+    document.getElementById('event-theme-box').style.display='';
+    document.getElementById('event-theme-title').textContent=e.theme;
   }
-
-  const pres = cache.presentations.filter(p => p.event_month === latest.month);
-  document.getElementById('event-pres-list').innerHTML = pres.length
-    ? pres.map(p => `
-      <div class="row-list-item">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:600;color:var(--c5);">${p.title}</div>
-          <div style="font-size:12px;color:var(--c3);margin-top:3px;">${withTeam(p.presenter)}</div>
+  const pres=cache.presentations.filter(p=>p.event_month===e.month).sort((a,b)=>a.order_num-b.order_num);
+  document.getElementById('event-pres-list').innerHTML=pres.length
+    ? pres.map((p,i)=>`
+      <div class="pres-item">
+        <span class="pres-num">${String(i+1).padStart(2,'0')}</span>
+        <div class="pres-info">
+          <div class="pres-title">${p.title}</div>
+          <div class="pres-presenter">${withTeam(p.presenter)}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-          <span class="tag">${p.type}</span>
-          <span style="font-size:12px;color:var(--c2);">${p.duration_min ? p.duration_min + '분' : ''}</span>
-        </div>
+        <span class="pres-type">${p.type}</span>
+        <span class="pres-dur">${p.duration_min?p.duration_min+'분':''}</span>
       </div>`).join('')
-    : '<div class="loading" style="padding:20px;">등록된 발표가 없습니다</div>';
+    : '<div class="pres-item"><span style="color:var(--w3);font-size:13px;">등록된 발표가 없습니다</span></div>';
 }
 
 // ── 지난 앉방데이 ──
-async function renderStory() {
-  if (!cache.events.length) await loadAll();
+async function renderStory(){
+  if(!cache.events.length) await loadAll();
   renderStoryEvents();
   renderStoryPres();
   renderStoryAI();
   renderStoryHosts();
 }
 
-function renderStoryEvents() {
-  document.getElementById('events-grid').innerHTML = cache.events.map(e => `
-    <div class="card hcard" style="padding:20px 24px;display:flex;align-items:center;gap:24px;" data-s="${e.month} ${e.host_team} ${e.theme}">
-      <div style="min-width:160px;flex-shrink:0;">
-        <div style="font-size:15px;font-weight:700;color:var(--c5);">${fmtMonth(e.month)}</div>
-        <div style="font-size:12px;color:var(--c2);margin-top:2px;">${e.date || e.month}</div>
+function getHostNames(month){
+  const hosts=cache.hosts.filter(h=>h.event_month===month);
+  if(!hosts.length) return '—';
+  const lead=hosts.find(h=>h.is_lead);
+  const others=hosts.filter(h=>!h.is_lead);
+  let parts=[];
+  if(lead) parts.push(lead.name);
+  if(others.length) parts.push(`외 ${others.length}인`);
+  return parts.join(' ');
+}
+
+function renderStoryEvents(){
+  document.getElementById('events-grid').innerHTML=cache.events.map(e=>`
+    <div class="event-row" data-s="${e.month} ${e.host_team} ${e.theme||''}">
+      <div>
+        <div class="event-row-month">${fmtMonth(e.month)}</div>
+        <div class="event-row-date">${e.date||e.month}</div>
       </div>
-      <div style="width:1px;height:32px;background:var(--c1);flex-shrink:0;"></div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;color:var(--c3);">앉방마님: ${e.host_team || '—'} &nbsp;·&nbsp; ${getHostNames(e.month)}</div>
-        ${e.theme ? `<div style="font-size:12px;color:var(--c2);margin-top:2px;">${e.theme}</div>` : ''}
-      </div>
-      <div style="flex-shrink:0;text-align:right;">
-        <div style="font-size:12px;color:var(--c2);">발표 ${cache.presentations.filter(p=>p.event_month===e.month).length}개</div>
-      </div>
+      <div class="event-row-divider"></div>
+      <div class="event-row-host">앉방마님 · ${e.host_team||'—'} &nbsp; ${getHostNames(e.month)}</div>
+      <div class="event-row-count">발표 ${cache.presentations.filter(p=>p.event_month===e.month).length}개</div>
     </div>`).join('');
 }
 
-function renderStoryPres() {
-  document.getElementById('pres-list').innerHTML = cache.presentations.map(p => `
-    <div class="row-list-item" data-s="${p.title} ${p.presenter} ${p.event_month} ${p.type}">
+function renderStoryPres(){
+  document.getElementById('pres-list').innerHTML=cache.presentations.map(p=>`
+    <div class="pres-row" data-s="${p.title} ${p.presenter} ${p.event_month} ${p.type}">
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
-        <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
+        <div style="font-size:14px;font-weight:500;color:var(--c5);">${p.title}</div>
+        <div style="font-size:12px;color:var(--c3);margin-top:3px;">${withTeam(p.presenter)}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
-        <span class="tag">${p.type}</span>
-        <span style="font-size:12px;color:var(--c2);">${fmtMonth(p.event_month)}</span>
-      </div>
+      <span class="type-pill">${p.type}</span>
+      <span style="font-size:12px;color:var(--w3);min-width:120px;text-align:right;">${fmtMonth(p.event_month)}</span>
     </div>`).join('');
 }
 
-function renderStoryAI() {
-  const ai = cache.presentations.filter(p => p.type === 'AI CAN DO');
-  document.getElementById('aicando-list').innerHTML = ai.length
-    ? ai.map(p => `
-      <div class="row-list-item" data-s="${p.title} ${p.presenter} ${p.event_month}">
+function renderStoryAI(){
+  const ai=cache.presentations.filter(p=>p.type==='AI CAN DO');
+  document.getElementById('aicando-list').innerHTML=ai.length
+    ? ai.map(p=>`
+      <div class="pres-row" data-s="${p.title} ${p.presenter} ${p.event_month}">
         <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
-          <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
+          <div style="font-size:14px;font-weight:500;color:var(--c5);">${p.title}</div>
+          <div style="font-size:12px;color:var(--c3);margin-top:3px;">${withTeam(p.presenter)}</div>
         </div>
-        <div style="flex-shrink:0;text-align:right;">
-          <div style="font-size:12px;color:var(--c2);">${fmtMonth(p.event_month)}</div>
-        </div>
+        <span style="font-size:12px;color:var(--c2);">${fmtMonth(p.event_month)}</span>
       </div>`).join('')
-    : '<div class="loading" style="padding:20px;">등록된 AI CAN DO 발표가 없습니다</div>';
+    : '<div class="pres-row"><span style="color:var(--w3);font-size:13px;">등록된 AI CAN DO 발표가 없습니다</span></div>';
 }
 
-function renderStoryHosts() {
-  // 월별로 묶어서 표시
-  const byMonth = {};
-  cache.hosts.forEach(h => {
-    if (!byMonth[h.event_month]) byMonth[h.event_month] = [];
-    byMonth[h.event_month].push(h);
-  });
-
-  const months = Object.keys(byMonth).sort((a, b) => b.localeCompare(a));
-  document.getElementById('hosts-list').innerHTML = months.map(month => {
-    const hostList = byMonth[month];
-    const lead = hostList.find(h => h.is_lead);
-    const members = hostList.filter(h => !h.is_lead);
-    const allNames = hostList.map(h => withTeam(h.name) + (h.is_lead ? ' <span class="tag" style="font-size:10px;">리드</span>' : '')).join(' &nbsp;·&nbsp; ');
-    return `
-      <div class="row-list-item" data-s="${month} ${hostList.map(h=>h.name).join(' ')}">
-        <div style="min-width:160px;flex-shrink:0;">
-          <div style="font-size:13px;font-weight:600;color:var(--c5);">${fmtMonth(month)}</div>
-        </div>
-        <div style="width:1px;height:24px;background:var(--c1);flex-shrink:0;"></div>
-        <div style="flex:1;font-size:13px;color:var(--c3);">${allNames}</div>
-      </div>`;
+function renderStoryHosts(){
+  const byMonth={};
+  cache.hosts.forEach(h=>{if(!byMonth[h.event_month])byMonth[h.event_month]=[];byMonth[h.event_month].push(h);});
+  const months=Object.keys(byMonth).sort((a,b)=>b.localeCompare(a));
+  document.getElementById('hosts-list').innerHTML=months.map(month=>{
+    const hostList=byMonth[month];
+    const allNames=hostList.map(h=>{
+      const info=peopleMap[h.name];
+      return `${h.name}${info?`<span class="team-hint">(${info.team})</span>`:''}${h.is_lead?' <span style="font-size:10px;border:1px solid rgba(255,255,255,0.2);border-radius:3px;padding:1px 5px;color:var(--w3);">리드</span>':''}`;
+    }).join(' &nbsp;·&nbsp; ');
+    return `<div class="host-row" data-s="${month} ${hostList.map(h=>h.name).join(' ')}">
+      <div class="host-row-month">${fmtMonth(month)}</div>
+      <div class="host-row-names">${allNames}</div>
+    </div>`;
   }).join('');
 }
 
-function switchTab(tab, btn) {
-  ['events','presentations','aicando','hosts'].forEach(t => document.getElementById('story-'+t).style.display='none');
-  document.querySelectorAll('#page-story .tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('story-'+tab).style.display='';
+function switchTab(tab,btn){
+  document.querySelectorAll('.story-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.s-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('story-'+tab).classList.add('active');
   btn.classList.add('active');
 }
 
-function filterStory() {
-  const q = document.getElementById('q').value.toLowerCase();
-  document.querySelectorAll('[data-s]').forEach(el => {
-    el.style.display = el.dataset.s.toLowerCase().includes(q) ? '' : 'none';
+function filterStory(){
+  const q=document.getElementById('q').value.toLowerCase();
+  document.querySelectorAll('[data-s]').forEach(el=>{
+    el.style.display=el.dataset.s.toLowerCase().includes(q)?'':'none';
   });
 }
 
-// ── 관리자 ──
-let adminUnlocked = false;
+// ── 운영관리 오픈/클로즈 ──
+function openAdmin(){
+  document.getElementById('admin-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  if(adminUnlocked) loadAdminData();
+}
+function closeAdmin(){
+  document.getElementById('admin-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
 
-function checkPw() {
-  const pw = document.getElementById('admin-pw').value;
-  if (pw === ADMIN_PW) {
-    adminUnlocked = true;
-    document.getElementById('admin-login').style.display = 'none';
-    document.getElementById('admin-panel').style.display = '';
+// ── 관리자 ──
+let adminUnlocked=false;
+function checkPw(){
+  const pw=document.getElementById('admin-pw').value;
+  if(pw===ADMIN_PW){
+    adminUnlocked=true;
+    document.getElementById('admin-login').style.display='none';
+    document.getElementById('admin-panel').style.display='';
     loadAdminData();
   } else {
-    document.getElementById('pw-error').style.display = '';
-    document.getElementById('admin-pw').value = '';
+    document.getElementById('pw-error').style.display='';
+    document.getElementById('admin-pw').value='';
   }
 }
-
-function logout() {
-  adminUnlocked = false;
-  document.getElementById('admin-login').style.display = 'flex';
-  document.getElementById('admin-panel').style.display = 'none';
-  document.getElementById('admin-pw').value = '';
+function logout(){
+  adminUnlocked=false;
+  document.getElementById('admin-login').style.display='flex';
+  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('admin-pw').value='';
 }
-
-function initAdmin() {
-  if (adminUnlocked) loadAdminData();
-}
-
-async function loadAdminData() {
+async function loadAdminData(){
   await loadAll();
   renderAdminEvents();
   renderAdminPres();
   renderAdminHosts();
   renderAdminPeople();
+  // 설정값 인풋 채우기
+  const driveInput=document.getElementById('setting-drive-url');
+  if(driveInput&&cache.settings.drive_url) driveInput.value=cache.settings.drive_url;
 }
 
-let selectedEventMonth = null;
-
-function renderAdminEvents() {
-  const list = document.getElementById('admin-events-list');
-  if (!cache.events.length) {
-    list.innerHTML = '<div class="loading" style="padding:20px;">등록된 행사가 없습니다</div>';
-    return;
-  }
-  list.innerHTML = cache.events.map(e => `
-    <div onclick="selectEvent('${e.month}')" style="
-      padding:14px 16px;
-      border-bottom:1px solid var(--c1);
-      cursor:pointer;
-      transition:background 0.12s;
-      background: ${e.month === selectedEventMonth ? 'var(--c0)' : '#fff'};
-      border-left: 3px solid ${e.month === selectedEventMonth ? 'var(--c4)' : 'transparent'};
-    " onmouseover="this.style.background='var(--c0)'" onmouseout="this.style.background='${e.month === selectedEventMonth ? 'var(--c0)' : '#fff'}'"
-    >
+let selectedEventMonth=null;
+function renderAdminEvents(){
+  const list=document.getElementById('admin-events-list');
+  if(!cache.events.length){list.innerHTML='<div class="loading" style="padding:20px;">등록된 행사가 없습니다</div>';return;}
+  list.innerHTML=cache.events.map(e=>`
+    <div onclick="selectEvent('${e.month}')" style="padding:14px 16px;border-bottom:1px solid var(--c1);cursor:pointer;transition:background 0.12s;background:${e.month===selectedEventMonth?'var(--c0)':'#fff'};border-left:3px solid ${e.month===selectedEventMonth?'var(--c4)':'transparent'};" onmouseover="this.style.background='var(--c0)'" onmouseout="this.style.background='${e.month===selectedEventMonth?'var(--c0)':'#fff'}'">
       <div style="font-size:13px;font-weight:600;color:var(--c5);">${fmtMonth(e.month)}</div>
-      <div style="font-size:11px;color:var(--c2);margin-top:3px;">${e.date || e.month}${e.host_team ? ' · '+e.host_team : ''}</div>
+      <div style="font-size:11px;color:var(--c2);margin-top:3px;">${e.date||e.month}${e.host_team?' · '+e.host_team:''}</div>
     </div>`).join('');
-
-  // 선택된 행사 없으면 첫 번째 자동 선택
-  if (!selectedEventMonth && cache.events.length) {
-    selectEvent(cache.events[0].month);
-  } else if (selectedEventMonth) {
-    selectEvent(selectedEventMonth);
-  }
+  if(!selectedEventMonth&&cache.events.length) selectEvent(cache.events[0].month);
+  else if(selectedEventMonth) selectEvent(selectedEventMonth);
 }
 
-function selectEvent(month) {
-  selectedEventMonth = month;
-  // 리스트 하이라이트 재렌더
-  document.querySelectorAll('#admin-events-list > div').forEach(el => {
-    const isSelected = el.querySelector('div').textContent === fmtMonth(month);
-    el.style.borderLeft = isSelected ? '3px solid var(--c4)' : '3px solid transparent';
-    el.style.background = isSelected ? 'var(--c0)' : '#fff';
+function selectEvent(month){
+  selectedEventMonth=month;
+  document.querySelectorAll('#admin-events-list > div').forEach(el=>{
+    const isSelected=el.querySelector('div').textContent===fmtMonth(month);
+    el.style.borderLeft=isSelected?'3px solid var(--c4)':'3px solid transparent';
+    el.style.background=isSelected?'var(--c0)':'#fff';
   });
-
-  const e = cache.events.find(x => x.month === month);
-  if (!e) return;
-
-  document.getElementById('event-detail-empty').style.display = 'none';
-  document.getElementById('event-detail-panel').style.display = '';
-
-  const hosts = cache.hosts.filter(h => h.event_month === month).sort((a,b)=>a.order_num-b.order_num);
-  const pres  = cache.presentations.filter(p => p.event_month === month).sort((a,b)=>a.order_num-b.order_num);
-
-  const hostsHtml = hosts.length
-    ? hosts.map(h => {
-        const info = peopleMap[h.name];
-        return `<span style="font-size:13px;color:var(--c5);">${h.name}</span><span style="font-size:11px;color:var(--c2);margin-left:3px;">${info?'('+info.team+')':''}</span>`;
-      }).join('<span style="color:var(--c1);margin:0 6px;">·</span>')
-    : '<span style="color:var(--c2);">등록된 명단 없음</span>';
-
-  const presHtml = pres.length
-    ? pres.map(p => `
-        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--c1);">
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
-            <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
-          </div>
-          <span class="tag" style="flex-shrink:0;">${p.type}</span>
-          <span style="font-size:12px;color:var(--c2);flex-shrink:0;">${p.duration_min?p.duration_min+'분':''}</span>
-          <div style="display:flex;gap:4px;flex-shrink:0;">
-            <button class="btn btn-ghost btn-sm" onclick="editPres('${p.id}')">수정</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}','loadAdminData')">삭제</button>
-          </div>
-        </div>`).join('')
-    : '<div style="color:var(--c2);font-size:13px;padding:12px 0;">등록된 발표 없음</div>';
-
-  document.getElementById('event-detail-content').innerHTML = `
-    <!-- 헤더 -->
+  const e=cache.events.find(x=>x.month===month);
+  if(!e) return;
+  document.getElementById('event-detail-empty').style.display='none';
+  document.getElementById('event-detail-panel').style.display='';
+  const hosts=cache.hosts.filter(h=>h.event_month===month).sort((a,b)=>a.order_num-b.order_num);
+  const pres=cache.presentations.filter(p=>p.event_month===month).sort((a,b)=>a.order_num-b.order_num);
+  const hostsHtml=hosts.length
+    ?hosts.map(h=>{const info=peopleMap[h.name];return `<span style="font-size:13px;color:var(--c5);">${h.name}</span><span style="font-size:11px;color:var(--c2);margin-left:3px;">${info?'('+info.team+')':''}</span>`;}).join('<span style="color:var(--c1);margin:0 6px;">·</span>')
+    :'<span style="color:var(--c2);">등록된 명단 없음</span>';
+  const presHtml=pres.length
+    ?pres.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--c1);"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div><div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div></div><span class="tag" style="flex-shrink:0;">${p.type}</span><span style="font-size:12px;color:var(--c2);flex-shrink:0;">${p.duration_min?p.duration_min+'분':''}</span><div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="editPres('${p.id}')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}')">삭제</button></div></div>`).join('')
+    :'<div style="color:var(--c2);font-size:13px;padding:12px 0;">등록된 발표 없음</div>';
+  document.getElementById('event-detail-content').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
-      <div>
-        <div style="font-size:18px;font-weight:700;color:var(--c5);">${fmtMonth(month)}</div>
-        <div style="font-size:12px;color:var(--c2);margin-top:3px;">${e.date || ''} ${e.time_range || ''}</div>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-ghost btn-sm" onclick="editEvent('${e.id}')">기본정보 수정</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_events','${e.id}','loadAdminData')">삭제</button>
-      </div>
+      <div><div style="font-size:18px;font-weight:700;color:var(--c5);">${fmtMonth(month)}</div><div style="font-size:12px;color:var(--c2);margin-top:3px;">${e.date||''} ${e.time_range||''}</div></div>
+      <div style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm" onclick="editEvent('${e.id}')">기본정보 수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_events','${e.id}')">삭제</button></div>
     </div>
-
-    <!-- 기본 정보 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
-      <div style="background:var(--c0);border-radius:8px;padding:12px;">
-        <div style="font-size:11px;color:var(--c2);margin-bottom:4px;">테마</div>
-        <div style="font-size:13px;color:var(--c5);font-weight:500;">${e.theme || '—'}</div>
-      </div>
-      <div style="background:var(--c0);border-radius:8px;padding:12px;">
-        <div style="font-size:11px;color:var(--c2);margin-bottom:4px;">장소</div>
-        <div style="font-size:13px;color:var(--c5);font-weight:500;">${e.location || '—'}</div>
-      </div>
-      <div style="background:var(--c0);border-radius:8px;padding:12px;grid-column:1/-1;">
-        <div style="font-size:11px;color:var(--c2);margin-bottom:6px;">앉방마님 명단</div>
-        <div>${hostsHtml}</div>
-      </div>
+      <div style="background:var(--c0);border-radius:8px;padding:12px;"><div style="font-size:11px;color:var(--c2);margin-bottom:4px;">테마</div><div style="font-size:13px;color:var(--c5);font-weight:500;">${e.theme||'—'}</div></div>
+      <div style="background:var(--c0);border-radius:8px;padding:12px;"><div style="font-size:11px;color:var(--c2);margin-bottom:4px;">장소</div><div style="font-size:13px;color:var(--c5);font-weight:500;">${e.location||'—'}</div></div>
+      <div style="background:var(--c0);border-radius:8px;padding:12px;grid-column:1/-1;"><div style="font-size:11px;color:var(--c2);margin-bottom:6px;">앉방마님 명단</div><div>${hostsHtml}</div></div>
     </div>
-
-    <!-- 발표 세션 -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
       <div style="font-size:13px;font-weight:600;color:var(--c5);">발표 세션</div>
       <button class="btn btn-primary btn-sm" onclick="openPresModalForEvent('${month}')">+ 발표 추가</button>
     </div>
-    <div>${presHtml}</div>
-  `;
+    <div>${presHtml}</div>`;
 }
 
-// 특정 행사 월로 발표 추가 모달 열기
-function openPresModalForEvent(month) {
-  document.getElementById('pm-month').innerHTML = cache.events.map(e =>
-    `<option value="${e.month}" ${e.month===month?'selected':''} >${fmtMonth(e.month)}</option>`
-  ).join('');
-  document.getElementById('pm-id').value = '';
-  document.getElementById('pm-title').value = '';
-  document.getElementById('pm-presenter').value = '';
-  document.getElementById('pm-duration').value = '';
-  document.getElementById('pm-order').value = '';
-  document.getElementById('pres-modal-title').textContent = '발표 추가';
-  document.getElementById('pres-modal').classList.add('open');
+function renderAdminPres(){
+  document.getElementById('admin-pres-body').innerHTML=cache.presentations.map(p=>`
+    <tr><td><span class="tag" style="font-size:10px;">${p.event_month}</span></td><td>${p.title}</td><td style="color:var(--c3);font-size:12px;">${p.presenter}</td><td><span class="tag">${p.type}</span></td><td style="color:var(--c3);font-size:12px;">${p.duration_min?p.duration_min+'분':'—'}</td>
+    <td style="text-align:right;"><button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPres('${p.id}')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}')">삭제</button></td></tr>`).join('');
 }
 
-function renderAdminPres() {
-  document.getElementById('admin-pres-body').innerHTML = cache.presentations.map(p => `
-    <tr>
-      <td><span class="tag" style="font-size:10px;">${p.event_month}</span></td>
-      <td>${p.title}</td>
-      <td style="color:var(--c3);font-size:12px;">${p.presenter}</td>
-      <td><span class="tag">${p.type}</span></td>
-      <td style="color:var(--c3);font-size:12px;">${p.duration_min ? p.duration_min + '분' : '—'}</td>
-      <td style="text-align:right;">
-        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPres('${p.id}')">수정</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}','loadAdminData')">삭제</button>
-      </td>
-    </tr>`).join('');
-}
-
-function renderAdminHosts() {
-  // 월별 그룹핑
-  const byMonth = {};
-  cache.hosts.forEach(h => {
-    if (!byMonth[h.event_month]) byMonth[h.event_month] = [];
-    byMonth[h.event_month].push(h);
-  });
-  const months = Object.keys(byMonth).sort((a,b) => b.localeCompare(a));
-  document.getElementById('admin-hosts-body').innerHTML = months.map(month => {
-    const ev = cache.events.find(e => e.month === month);
-    const hostList = byMonth[month].sort((a,b) => a.order_num - b.order_num);
-    const nameHtml = hostList.map(h => {
-      const info = peopleMap[h.name];
-      return info ? `${h.name}(${info.team})` : h.name;
-    }).join(', ');
-    return `<tr>
-      <td><span class="tag" style="font-size:10px;">${fmtMonth(month)}</span></td>
-      <td style="color:var(--c3);font-size:12px;">${ev ? ev.date : month}</td>
-      <td style="font-size:13px;color:var(--c5);">${nameHtml}</td>
-      <td style="text-align:right;white-space:nowrap;">
-        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="openEditHostModal('${month}')">수정</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteHostsByMonth('${month}')">삭제</button>
-      </td>
-    </tr>`;
+function renderAdminHosts(){
+  const byMonth={};
+  cache.hosts.forEach(h=>{if(!byMonth[h.event_month])byMonth[h.event_month]=[];byMonth[h.event_month].push(h);});
+  const months=Object.keys(byMonth).sort((a,b)=>b.localeCompare(a));
+  document.getElementById('admin-hosts-body').innerHTML=months.map(month=>{
+    const ev=cache.events.find(e=>e.month===month);
+    const hostList=byMonth[month].sort((a,b)=>a.order_num-b.order_num);
+    const nameHtml=hostList.map(h=>{const info=peopleMap[h.name];return info?`${h.name}(${info.team})`:h.name;}).join(', ');
+    return `<tr><td><span class="tag" style="font-size:10px;">${fmtMonth(month)}</span></td><td style="color:var(--c3);font-size:12px;">${ev?ev.date:month}</td><td style="font-size:13px;color:var(--c5);">${nameHtml}</td>
+    <td style="text-align:right;white-space:nowrap;"><button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="openEditHostModal('${month}')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteHostsByMonth('${month}')">삭제</button></td></tr>`;
   }).join('');
 }
 
-let peopleSortKey = 'name';
-let peopleSortAsc = true;
-
-function sortPeople(key) {
-  if (peopleSortKey === key) {
-    peopleSortAsc = !peopleSortAsc;
-  } else {
-    peopleSortKey = key;
-    peopleSortAsc = true;
-  }
-  // 버튼 표시 업데이트
-  ['name','team','title'].forEach(k => {
-    const btn = document.getElementById('sort-'+k);
-    const labels = {name:'이름',team:'팀',title:'직함'};
-    if (btn) btn.textContent = labels[k] + (k === peopleSortKey ? (peopleSortAsc ? ' ↑' : ' ↓') : ' ↕');
-  });
+let peopleSortKey='name',peopleSortAsc=true;
+function sortPeople(key){
+  if(peopleSortKey===key){peopleSortAsc=!peopleSortAsc;}else{peopleSortKey=key;peopleSortAsc=true;}
+  const labels={name:'이름',team:'팀',title:'직함'};
+  ['name','team','title'].forEach(k=>{const btn=document.getElementById('sort-'+k);if(btn)btn.textContent=labels[k]+(k===peopleSortKey?(peopleSortAsc?' ↑':' ↓'):' ↕');});
   renderAdminPeople();
 }
-
-function renderAdminPeople() {
-  const sorted = [...cache.people].sort((a, b) => {
-    const va = (a[peopleSortKey] || '').toLowerCase();
-    const vb = (b[peopleSortKey] || '').toLowerCase();
-    return peopleSortAsc ? va.localeCompare(vb, 'ko') : vb.localeCompare(va, 'ko');
-  });
-
-  document.getElementById('admin-people-body').innerHTML = sorted.map(p => {
-    // 앉방마님 이력
-    const hostMonths = cache.hosts
-      .filter(h => h.name === p.name)
-      .map(h => h.event_month)
-      .sort((a,b) => b.localeCompare(a));
-    const hostHtml = hostMonths.length
-      ? hostMonths.map(m => `<span class="tag" style="font-size:10px;margin-right:2px;">${fmtMonth(m)}</span>`).join('')
-      : '<span style="color:var(--c2);font-size:12px;">—</span>';
-
-    // 발표 이력
-    const presItems = cache.presentations.filter(pr => {
-      return pr.presenter.split(',').map(n=>n.trim()).includes(p.name);
-    }).sort((a,b) => b.event_month.localeCompare(a.event_month));
-    const presHtml = presItems.length
-      ? presItems.map(pr => `<div style="font-size:11px;color:var(--c3);margin-bottom:2px;"><span style="color:var(--c2);">${fmtMonth(pr.event_month)}</span> ${pr.title}</div>`).join('')
-      : '<span style="color:var(--c2);font-size:12px;">—</span>';
-
-    return `<tr>
-      <td style="font-weight:500;">${p.name}</td>
-      <td style="color:var(--c3);">${p.team}</td>
-      <td style="color:var(--c3);font-size:12px;">${p.title || '—'}</td>
-      <td style="max-width:180px;">${hostHtml}</td>
-      <td style="max-width:220px;">${presHtml}</td>
-      <td style="text-align:right;white-space:nowrap;">
-        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPerson('${p.id}')">수정</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_people','${p.id}','loadAdminData')">삭제</button>
-      </td>
-    </tr>`;
+function renderAdminPeople(){
+  const sorted=[...cache.people].sort((a,b)=>{const va=(a[peopleSortKey]||'').toLowerCase(),vb=(b[peopleSortKey]||'').toLowerCase();return peopleSortAsc?va.localeCompare(vb,'ko'):vb.localeCompare(va,'ko');});
+  document.getElementById('admin-people-body').innerHTML=sorted.map(p=>{
+    const hostMonths=cache.hosts.filter(h=>h.name===p.name).map(h=>h.event_month).sort((a,b)=>b.localeCompare(a));
+    const hostHtml=hostMonths.length?hostMonths.map(m=>`<span class="tag" style="font-size:10px;margin-right:2px;">${fmtMonth(m)}</span>`).join(''):'<span style="color:var(--c2);font-size:12px;">—</span>';
+    const presItems=cache.presentations.filter(pr=>pr.presenter.split(',').map(n=>n.trim()).includes(p.name)).sort((a,b)=>b.event_month.localeCompare(a.event_month));
+    const presHtml=presItems.length?presItems.map(pr=>`<div style="font-size:11px;color:var(--c3);margin-bottom:2px;"><span style="color:var(--c2);">${fmtMonth(pr.event_month)}</span> ${pr.title}</div>`).join(''):'<span style="color:var(--c2);font-size:12px;">—</span>';
+    return `<tr><td style="font-weight:500;">${p.name}</td><td style="color:var(--c3);">${p.team}</td><td style="color:var(--c3);font-size:12px;">${p.title||'—'}</td><td style="max-width:180px;">${hostHtml}</td><td style="max-width:220px;">${presHtml}</td>
+    <td style="text-align:right;white-space:nowrap;"><button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPerson('${p.id}')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_people','${p.id}')">삭제</button></td></tr>`;
   }).join('');
 }
 
-function switchAdminTab(tab, btn) {
-  ['events','presentations','hosts','people'].forEach(t => document.getElementById('admin-'+t).style.display='none');
-  document.querySelectorAll('#admin-panel .tab').forEach(b => b.classList.remove('active'));
+function switchAdminTab(tab,btn){
+  ['events','presentations','hosts','people','settings'].forEach(t=>document.getElementById('admin-'+t).style.display='none');
+  document.querySelectorAll('#admin-panel .tab').forEach(b=>b.classList.remove('active'));
   document.getElementById('admin-'+tab).style.display='';
   btn.classList.add('active');
 }
 
 // ── 모달 ──
-function openModal(id) {
-  if (id === 'pres-modal') {
-    document.getElementById('pm-month').innerHTML = cache.events.map(e => `<option value="${e.month}">${fmtMonth(e.month)}</option>`).join('');
-  }
-  if (id === 'host-modal') {
-    // 행사 셀렉트 채우기
-    document.getElementById('hm-month').innerHTML = cache.events.map(e => `<option value="${e.month}">${fmtMonth(e.month)}</option>`).join('');
-    document.getElementById('hm-id').value = '';
-    // 첫 번째 월 기준으로 체크박스 렌더
+function openModal(id){
+  if(id==='pres-modal') document.getElementById('pm-month').innerHTML=cache.events.map(e=>`<option value="${e.month}">${fmtMonth(e.month)}</option>`).join('');
+  if(id==='host-modal'){
+    document.getElementById('hm-month').innerHTML=cache.events.map(e=>`<option value="${e.month}">${fmtMonth(e.month)}</option>`).join('');
+    document.getElementById('hm-id').value='';
     refreshHostPeopleSelect();
   }
   document.getElementById(id).classList.add('open');
 }
-
-// 앉방마님 모달: 인물 체크박스 렌더
-function refreshHostPeopleSelect() {
-  const month = document.getElementById('hm-month').value;
-  const existing = cache.hosts.filter(h => h.event_month === month).map(h => h.name);
-  const container = document.getElementById('hm-people-checkboxes');
-  if (!cache.people.length) {
-    container.innerHTML = '<div style="color:var(--c2);font-size:13px;">인물-팀 관리에서 먼저 인물을 등록해주세요</div>';
-    return;
-  }
-  const sorted = [...cache.people].sort((a,b) => a.name.localeCompare(b.name, 'ko'));
-  container.innerHTML = sorted.map(p => `
-    <label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px;color:var(--c5);">
-      <input type="checkbox" value="${p.name}" ${existing.includes(p.name) ? 'checked' : ''}
-        style="width:14px;height:14px;accent-color:var(--c4);" />
-      <span>${p.name}</span>
-      <span style="font-size:11px;color:var(--c2);">${p.team}${p.title ? ' · '+p.title : ''}</span>
-    </label>`).join('');
+function openPresModalForEvent(month){
+  document.getElementById('pm-month').innerHTML=cache.events.map(e=>`<option value="${e.month}" ${e.month===month?'selected':''}>${fmtMonth(e.month)}</option>`).join('');
+  document.getElementById('pm-id').value='';
+  document.getElementById('pm-title').value='';
+  document.getElementById('pm-presenter').value='';
+  document.getElementById('pm-duration').value='';
+  document.getElementById('pm-order').value='';
+  document.getElementById('pres-modal-title').textContent='발표 추가';
+  document.getElementById('pres-modal').classList.add('open');
 }
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(bg=>{bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');});});
 
-// 월별 앉방마님 수정 모달 열기
-function openEditHostModal(month) {
-  document.getElementById('hm-month').innerHTML = cache.events.map(e => `<option value="${e.month}" ${e.month===month ? 'selected' : ''}>${fmtMonth(e.month)}</option>`).join('');
-  document.getElementById('hm-id').value = month; // 수정 시 month를 id로 활용
+function refreshHostPeopleSelect(){
+  const month=document.getElementById('hm-month').value;
+  const existing=cache.hosts.filter(h=>h.event_month===month).map(h=>h.name);
+  const container=document.getElementById('hm-people-checkboxes');
+  if(!cache.people.length){container.innerHTML='<div style="color:var(--c2);font-size:13px;">인물-팀 관리에서 먼저 인물을 등록해주세요</div>';return;}
+  const sorted=[...cache.people].sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+  container.innerHTML=sorted.map(p=>`<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px;color:var(--c5);"><input type="checkbox" value="${p.name}" ${existing.includes(p.name)?'checked':''} style="width:14px;height:14px;accent-color:var(--c4);"/><span>${p.name}</span><span style="font-size:11px;color:var(--c2);">${p.team}${p.title?' · '+p.title:''}</span></label>`).join('');
+}
+function openEditHostModal(month){
+  document.getElementById('hm-month').innerHTML=cache.events.map(e=>`<option value="${e.month}" ${e.month===month?'selected':''}>${fmtMonth(e.month)}</option>`).join('');
+  document.getElementById('hm-id').value=month;
   refreshHostPeopleSelect();
-  document.getElementById('host-modal-title').textContent = '앉방마님 수정';
+  document.getElementById('host-modal-title').textContent='앉방마님 수정';
   document.getElementById('host-modal').classList.add('open');
 }
 
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-// 모달 바깥 클릭 시 닫기
-document.querySelectorAll('.modal-bg').forEach(bg => {
-  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
-});
-
-// ── 행사 저장 ──
-async function saveEvent() {
-  const id = document.getElementById('em-id').value;
-  const data = {
-    month:      document.getElementById('em-month').value.trim(),
-    theme:      document.getElementById('em-theme').value.trim(),
-    date:       document.getElementById('em-date').value.trim(),
-    time_range: document.getElementById('em-time').value.trim(),
-    location:   document.getElementById('em-location').value.trim(),
-    host_team:  document.getElementById('em-host-team').value.trim(),
-  };
-  if (!data.month) return alert('월을 입력하세요');
-  if (id) {
-    await sb.from('anbang_events').update(data).eq('id', id);
-  } else {
-    await sb.from('anbang_events').insert(data);
-  }
+// ── CRUD ──
+async function saveEvent(){
+  const id=document.getElementById('em-id').value;
+  const data={month:document.getElementById('em-month').value.trim(),theme:document.getElementById('em-theme').value.trim(),date:document.getElementById('em-date').value.trim(),time_range:document.getElementById('em-time').value.trim(),location:document.getElementById('em-location').value.trim(),host_team:document.getElementById('em-host-team').value.trim()};
+  if(!data.month) return alert('월을 입력하세요');
+  if(id) await sb.from('anbang_events').update(data).eq('id',id);
+  else await sb.from('anbang_events').insert(data);
   closeModal('event-modal');
   resetForm(['em-id','em-month','em-theme','em-date','em-host-team']);
   await loadAdminData();
 }
-
-function editEvent(id) {
-  const e = cache.events.find(x => x.id === id);
-  if (!e) return;
-  document.getElementById('em-id').value       = e.id;
-  document.getElementById('em-month').value    = e.month;
-  document.getElementById('em-theme').value    = e.theme || '';
-  document.getElementById('em-date').value     = e.date || '';
-  document.getElementById('em-time').value     = e.time_range || '';
-  document.getElementById('em-location').value = e.location || '';
-  document.getElementById('em-host-team').value= e.host_team || '';
-  document.getElementById('event-modal-title').textContent = '행사 수정';
+function editEvent(id){
+  const e=cache.events.find(x=>x.id===id);if(!e)return;
+  document.getElementById('em-id').value=e.id;document.getElementById('em-month').value=e.month;document.getElementById('em-theme').value=e.theme||'';document.getElementById('em-date').value=e.date||'';document.getElementById('em-time').value=e.time_range||'';document.getElementById('em-location').value=e.location||'';document.getElementById('em-host-team').value=e.host_team||'';
+  document.getElementById('event-modal-title').textContent='행사 수정';
   openModal('event-modal');
 }
-
-// ── 발표 저장 ──
-async function savePresentation() {
-  const id = document.getElementById('pm-id').value;
-  const data = {
-    event_month:  document.getElementById('pm-month').value,
-    title:        document.getElementById('pm-title').value.trim(),
-    presenter:    document.getElementById('pm-presenter').value.trim(),
-    type:         document.getElementById('pm-type').value,
-    duration_min: parseInt(document.getElementById('pm-duration').value) || null,
-    order_num:    parseInt(document.getElementById('pm-order').value) || 0,
-  };
-  if (!data.title) return alert('제목을 입력하세요');
-  if (id) {
-    await sb.from('anbang_presentations').update(data).eq('id', id);
-  } else {
-    await sb.from('anbang_presentations').insert(data);
-  }
+async function savePresentation(){
+  const id=document.getElementById('pm-id').value;
+  const data={event_month:document.getElementById('pm-month').value,title:document.getElementById('pm-title').value.trim(),presenter:document.getElementById('pm-presenter').value.trim(),type:document.getElementById('pm-type').value,duration_min:parseInt(document.getElementById('pm-duration').value)||null,order_num:parseInt(document.getElementById('pm-order').value)||0};
+  if(!data.title) return alert('제목을 입력하세요');
+  if(id) await sb.from('anbang_presentations').update(data).eq('id',id);
+  else await sb.from('anbang_presentations').insert(data);
   closeModal('pres-modal');
   resetForm(['pm-id','pm-title','pm-presenter','pm-duration','pm-order']);
   await loadAdminData();
-  // 상세 패널 갱신
-  if (selectedEventMonth) selectEvent(selectedEventMonth);
+  if(selectedEventMonth) selectEvent(selectedEventMonth);
 }
-
-function editPres(id) {
-  const p = cache.presentations.find(x => x.id === id);
-  if (!p) return;
+function editPres(id){
+  const p=cache.presentations.find(x=>x.id===id);if(!p)return;
   openModal('pres-modal');
-  setTimeout(() => {
-    document.getElementById('pm-id').value       = p.id;
-    document.getElementById('pm-month').value    = p.event_month;
-    document.getElementById('pm-title').value    = p.title;
-    document.getElementById('pm-presenter').value= p.presenter;
-    document.getElementById('pm-type').value     = p.type;
-    document.getElementById('pm-duration').value = p.duration_min || '';
-    document.getElementById('pm-order').value    = p.order_num || '';
-    document.getElementById('pres-modal-title').textContent = '발표 수정';
-  }, 50);
+  setTimeout(()=>{document.getElementById('pm-id').value=p.id;document.getElementById('pm-month').value=p.event_month;document.getElementById('pm-title').value=p.title;document.getElementById('pm-presenter').value=p.presenter;document.getElementById('pm-type').value=p.type;document.getElementById('pm-duration').value=p.duration_min||'';document.getElementById('pm-order').value=p.order_num||'';document.getElementById('pres-modal-title').textContent='발표 수정';},50);
 }
-
-// ── 앉방마님 저장 ──
-async function saveHost() {
-  const month = document.getElementById('hm-month').value;
-  const checked = [...document.querySelectorAll('#hm-people-checkboxes input[type=checkbox]:checked')].map(cb => cb.value);
-  if (!month) return alert('행사 월을 선택하세요');
-  if (!checked.length) return alert('명단을 1명 이상 선택하세요');
-
-  // 기존 해당 월 명단 삭제 후 재삽입
-  await sb.from('anbang_hosts').delete().eq('event_month', month);
-  const inserts = checked.map((name, idx) => ({
-    event_month: month,
-    name,
-    is_lead: idx === 0,   // 첫 번째 선택이 리드
-    order_num: idx,
-  }));
-  await sb.from('anbang_hosts').insert(inserts);
-
+async function saveHost(){
+  const month=document.getElementById('hm-month').value;
+  const checked=[...document.querySelectorAll('#hm-people-checkboxes input[type=checkbox]:checked')].map(cb=>cb.value);
+  if(!month) return alert('행사 월을 선택하세요');
+  if(!checked.length) return alert('명단을 1명 이상 선택하세요');
+  await sb.from('anbang_hosts').delete().eq('event_month',month);
+  await sb.from('anbang_hosts').insert(checked.map((name,idx)=>({event_month:month,name,is_lead:idx===0,order_num:idx})));
   closeModal('host-modal');
   await loadAdminData();
 }
-
-async function deleteHostsByMonth(month) {
-  if (!confirm(`${fmtMonth(month)} 앉방마님 명단을 삭제하시겠습니까?`)) return;
-  await sb.from('anbang_hosts').delete().eq('event_month', month);
+async function deleteHostsByMonth(month){
+  if(!confirm(`${fmtMonth(month)} 앉방마님 명단을 삭제하시겠습니까?`))return;
+  await sb.from('anbang_hosts').delete().eq('event_month',month);
   await loadAdminData();
 }
-
-// ── 인물 저장 ──
-async function savePerson() {
-  const id = document.getElementById('ppm-id').value;
-  const data = {
-    name:  document.getElementById('ppm-name').value.trim(),
-    team:  document.getElementById('ppm-team').value.trim(),
-    title: document.getElementById('ppm-title').value.trim() || null,
-  };
-  if (!data.name || !data.team) return alert('이름과 팀을 입력하세요');
-  if (id) {
-    await sb.from('anbang_people').update(data).eq('id', id);
-  } else {
-    await sb.from('anbang_people').insert(data);
-  }
+async function savePerson(){
+  const id=document.getElementById('ppm-id').value;
+  const data={name:document.getElementById('ppm-name').value.trim(),team:document.getElementById('ppm-team').value.trim(),title:document.getElementById('ppm-title').value.trim()||null};
+  if(!data.name||!data.team) return alert('이름과 팀을 입력하세요');
+  if(id) await sb.from('anbang_people').update(data).eq('id',id);
+  else await sb.from('anbang_people').insert(data);
   closeModal('people-modal');
   resetForm(['ppm-id','ppm-name','ppm-team','ppm-title']);
   await loadAdminData();
 }
-
-function editPerson(id) {
-  const p = cache.people.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('ppm-id').value    = p.id;
-  document.getElementById('ppm-name').value  = p.name;
-  document.getElementById('ppm-team').value  = p.team;
-  document.getElementById('ppm-title').value = p.title || '';
-  document.getElementById('people-modal-title').textContent = '인물 수정';
+function editPerson(id){
+  const p=cache.people.find(x=>x.id===id);if(!p)return;
+  document.getElementById('ppm-id').value=p.id;document.getElementById('ppm-name').value=p.name;document.getElementById('ppm-team').value=p.team;document.getElementById('ppm-title').value=p.title||'';
+  document.getElementById('people-modal-title').textContent='인물 수정';
   openModal('people-modal');
 }
-
-// ── 삭제 ──
-async function deleteRow(table, id, reloadFn) {
-  if (!confirm('정말 삭제하시겠습니까?')) return;
-  await sb.from(table).delete().eq('id', id);
+async function deleteRow(table,id){
+  if(!confirm('정말 삭제하시겠습니까?'))return;
+  await sb.from(table).delete().eq('id',id);
   await loadAdminData();
-  if (selectedEventMonth && table === 'anbang_presentations') selectEvent(selectedEventMonth);
+  if(selectedEventMonth&&table==='anbang_presentations') selectEvent(selectedEventMonth);
+}
+function resetForm(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
+
+// ── 설정 저장 ──
+async function saveSetting(key, inputId){
+  const val=document.getElementById(inputId).value.trim();
+  if(!val) return alert('값을 입력하세요');
+  await sb.from('anbang_settings').upsert({key, value:val, updated_at:new Date().toISOString()});
+  await loadAll();
+  alert('저장되었습니다');
 }
 
-// ── 폼 초기화 ──
-function resetForm(ids) {
-  ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+// ── 아코디언 ──
+function toggleGuide(card){
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('.guide-card').forEach(c => c.classList.remove('open'));
+  if(!isOpen) card.classList.add('open');
 }
 
-// ── 초기 로드 ──
-(async () => {
+// ── 초기화 ──
+(async()=>{
   await loadAll();
   renderHome();
+  renderEvent();
+  renderStory();
 })();
 </script>
 </body>
