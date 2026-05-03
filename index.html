@@ -322,7 +322,7 @@ tr:hover td{background:var(--c0);}
     <input class="story-search" id="q" oninput="filterStory()" placeholder="발표 제목, 발표자, 팀 이름으로 검색"/>
     <div class="story-tabs">
       <button class="s-tab active" onclick="switchTab('events',this)">앉방데이</button>
-      <button class="s-tab" onclick="switchTab('presentations',this)">발표</button>
+      <button class="s-tab" onclick="switchTab('presentations',this)">실무 발표</button>
       <button class="s-tab" onclick="switchTab('aicando',this)">AI CAN DO</button>
       <button class="s-tab" onclick="switchTab('hosts',this)">앉방마님</button>
     </div>
@@ -836,29 +836,73 @@ function toggleEventRow(el){
 }
 
 function renderStoryPres(){
-  document.getElementById('pres-list').innerHTML=cache.presentations.map(p=>`
-    <div class="pres-row" data-s="${p.title} ${p.presenter} ${p.event_month} ${p.type}">
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:500;color:var(--c5);">${p.title}</div>
-        <div style="font-size:12px;color:var(--c3);margin-top:3px;">${withTeam(p.presenter)}</div>
+  // 실무 발표(AI CAN DO 제외) 월별 그룹핑
+  const filtered = cache.presentations.filter(p => p.type !== 'AI CAN DO');
+  const byMonth = {};
+  filtered.forEach(p => {
+    if(!byMonth[p.event_month]) byMonth[p.event_month] = [];
+    byMonth[p.event_month].push(p);
+  });
+  const months = Object.keys(byMonth).sort((a,b) => b.localeCompare(a));
+  document.getElementById('pres-list').innerHTML = months.map(month => {
+    const items = byMonth[month].sort((a,b) => a.order_num - b.order_num);
+    const itemsHtml = items.map(p => `
+      <div class="event-pres-item" data-s="${p.title} ${p.presenter} ${month}">
+        <span class="type-pill" style="flex-shrink:0;">${p.type}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
+          <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
+        </div>
+      </div>`).join('');
+    return `
+    <div class="event-row" data-s="${month} ${items.map(p=>p.title+' '+p.presenter).join(' ')}" onclick="toggleEventRow(this)">
+      <div class="event-row-header">
+        <div style="min-width:160px;flex-shrink:0;">
+          <div class="event-row-month">${fmtMonth(month)}</div>
+        </div>
+        <div class="event-row-divider"></div>
+        <div class="event-row-host" style="color:var(--c2);">발표 ${items.length}개</div>
+        <div class="event-row-chevron">▾</div>
       </div>
-      <span class="type-pill">${p.type}</span>
-      <span style="font-size:12px;color:var(--w3);min-width:120px;text-align:right;">${fmtMonth(p.event_month)}</span>
-    </div>`).join('');
+      <div class="event-row-body">${itemsHtml}</div>
+    </div>`;
+  }).join('');
 }
 
 function renderStoryAI(){
-  const ai=cache.presentations.filter(p=>p.type==='AI CAN DO');
-  document.getElementById('aicando-list').innerHTML=ai.length
-    ? ai.map(p=>`
-      <div class="pres-row" data-s="${p.title} ${p.presenter} ${p.event_month}">
+  const ai = cache.presentations.filter(p => p.type === 'AI CAN DO');
+  if(!ai.length){
+    document.getElementById('aicando-list').innerHTML='<div style="padding:20px 28px;font-size:13px;color:var(--c2);">등록된 AI CAN DO 발표가 없습니다</div>';
+    return;
+  }
+  const byMonth = {};
+  ai.forEach(p => {
+    if(!byMonth[p.event_month]) byMonth[p.event_month] = [];
+    byMonth[p.event_month].push(p);
+  });
+  const months = Object.keys(byMonth).sort((a,b) => b.localeCompare(a));
+  document.getElementById('aicando-list').innerHTML = months.map(month => {
+    const items = byMonth[month].sort((a,b) => a.order_num - b.order_num);
+    const itemsHtml = items.map(p => `
+      <div class="event-pres-item" data-s="${p.title} ${p.presenter} ${month}">
         <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:500;color:var(--c5);">${p.title}</div>
-          <div style="font-size:12px;color:var(--c3);margin-top:3px;">${withTeam(p.presenter)}</div>
+          <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
+          <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
         </div>
-        <span style="font-size:12px;color:var(--c2);">${fmtMonth(p.event_month)}</span>
-      </div>`).join('')
-    : '<div class="pres-row"><span style="color:var(--w3);font-size:13px;">등록된 AI CAN DO 발표가 없습니다</span></div>';
+      </div>`).join('');
+    return `
+    <div class="event-row" data-s="${month} ${items.map(p=>p.title+' '+p.presenter).join(' ')}" onclick="toggleEventRow(this)">
+      <div class="event-row-header">
+        <div style="min-width:160px;flex-shrink:0;">
+          <div class="event-row-month">${fmtMonth(month)}</div>
+        </div>
+        <div class="event-row-divider"></div>
+        <div class="event-row-host" style="color:var(--c2);">발표 ${items.length}개</div>
+        <div class="event-row-chevron">▾</div>
+      </div>
+      <div class="event-row-body">${itemsHtml}</div>
+    </div>`;
+  }).join('');
 }
 
 function renderStoryHosts(){
@@ -869,7 +913,7 @@ function renderStoryHosts(){
     const hostList=byMonth[month];
     const allNames=hostList.map(h=>{
       const info=peopleMap[h.name];
-      return `${h.name}${info?`<span class="team-hint">(${info.team})</span>`:''}${h.is_lead?' <span style="font-size:10px;border:1px solid rgba(255,255,255,0.2);border-radius:3px;padding:1px 5px;color:var(--w3);">리드</span>':''}`;
+      return `${h.name}${info?`<span class="team-hint">(${info.team})</span>`:''}`;
     }).join(' &nbsp;·&nbsp; ');
     return `<div class="host-row" data-s="${month} ${hostList.map(h=>h.name).join(' ')}">
       <div class="host-row-month">${fmtMonth(month)}</div>
