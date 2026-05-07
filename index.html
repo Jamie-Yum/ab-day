@@ -4,13 +4,33 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>시디즈 앉방데이</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+  @font-face {
+    font-family: 'Centra No2';
+    src: url('https://db.onlinewebfonts.com/t/centra-no2-book.woff2') format('woff2');
+    font-weight: 400; font-style: normal;
+  }
+</style>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"/>
+<link rel="icon" type="image/png" sizes="512x512" href="favicon-512.png"/>
+<link rel="apple-touch-icon" href="favicon-512.png"/>
+<meta property="og:title" content="시디즈 앉방데이"/>
+<meta property="og:description" content="함께 앉고, 함께 나누는 우리의 이야기"/>
+<meta property="og:image" content="og-image.png"/>
+<meta property="og:type" content="website"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="og-image.png"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ── 리셋 & 기본 ── */
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#f5f6fa;
+  --font-kr: 'Pretendard', 'Noto Sans KR', sans-serif;
+  --font-en: 'Centra No2', 'Pretendard', sans-serif;
   --bg2:#ffffff;
   --bg3:#eef0f6;
   --line:rgba(30,37,64,0.08);
@@ -22,12 +42,12 @@
   --c0:#f0f1f5;--c1:#e8eaf0;--c2:#b0b8cc;--c3:#5a6280;--c4:#1e2540;--c5:#111827;
 }
 html{scroll-behavior:smooth;}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--w);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+body{font-family:'Pretendard','Noto Sans KR',sans-serif;background:var(--bg);color:var(--w);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 
 /* ── 네비 ── */
 #nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;transition:background 0.3s;}
 #nav.scrolled{background:rgba(245,246,250,0.94);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,37,64,0.08);}
-.nav-logo{font-size:14px;font-weight:700;color:var(--c4);letter-spacing:-0.3px;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.nav-logo{font-size:14px;font-weight:700;color:var(--c4);letter-spacing:-0.3px;cursor:pointer;user-select:none;-webkit-user-select:none;font-family:var(--font-en);}
 .nav-menu-btn{display:flex;flex-direction:column;gap:5px;cursor:pointer;padding:8px;background:transparent;border:none;}
 .nav-menu-btn span{display:block;width:22px;height:1.5px;background:var(--c4);border-radius:2px;transition:all 0.25s;}
 /* 메뉴 오버레이 */
@@ -71,7 +91,7 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .btn-outline:hover{border-color:var(--c4);background:rgba(30,37,64,0.04);}
 
 /* ── 섹션 헤더 ── */
-.sec-eyebrow{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--w3);margin-bottom:16px;}
+.sec-eyebrow{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--w3);margin-bottom:16px;font-family:var(--font-en);}
 .sec-title{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-1px;color:var(--c5);line-height:1.1;margin-bottom:12px;}
 .sec-sub{font-size:15px;color:var(--c3);line-height:1.7;}
 
@@ -782,9 +802,13 @@ async function renderHome(){
   const hosts=cache.hosts.filter(h=>h.event_month===e.month).sort((a,b)=>a.order_num-b.order_num);
   if(hosts.length){
     document.getElementById('hc-host').textContent=hosts.map(h=>h.name).join(', ');
-    // 팀명: 중복 제거해서 표시
-    const teams=[...new Set(hosts.map(h=>{ const info=peopleMap[h.name]; return info?info.team:''; }).filter(Boolean))];
-    document.getElementById('hc-host-names').textContent=teams.join(' · ');
+    const teamLines=hosts.map(h=>{
+      const info=peopleMap[h.name];
+      return info?`${h.name} · ${info.team}`:h.name;
+    }).join('
+');
+    document.getElementById('hc-host-names').style.whiteSpace='pre-line';
+    document.getElementById('hc-host-names').textContent=teamLines;
   } else {
     document.getElementById('hc-host').textContent=e.host_team||'—';
     document.getElementById('hc-host-names').textContent='';
