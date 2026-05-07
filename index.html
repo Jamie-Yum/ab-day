@@ -547,9 +547,18 @@ tr:hover td{background:var(--c0);}
           <table><thead><tr><th>행사</th><th>날짜</th><th>발표 제목</th><th>발표자</th><th>시간</th><th></th></tr></thead>
           <tbody id="admin-pres-body-실무"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody></table>
         </div>
-        <div id="pres-sub-ai-body" class="card" style="overflow:hidden;display:none;">
-          <table><thead><tr><th>행사</th><th>날짜</th><th>발표 제목</th><th>발표자</th><th>시간</th><th></th></tr></thead>
-          <tbody id="admin-pres-body-ai"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody></table>
+        <div id="pres-sub-ai-body" style="display:none;">
+          <div class="card" style="overflow:hidden;margin-bottom:24px;">
+            <table><thead><tr><th>행사</th><th>날짜</th><th>발표 제목</th><th>발표자</th><th>시간</th><th></th></tr></thead>
+            <tbody id="admin-pres-body-ai"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody></table>
+          </div>
+          <div style="font-size:12px;font-weight:600;color:var(--c2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">앞으로의 발표자 후보</div>
+          <div class="card" style="overflow:hidden;">
+            <table>
+              <thead><tr><th>팀</th><th>이름</th></tr></thead>
+              <tbody id="admin-aicando-candidates"><tr><td colspan="2" class="loading">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -606,8 +615,8 @@ tr:hover td{background:var(--c0);}
           <div style="font-size:12px;font-weight:600;color:var(--c2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">앉방마님 미경험</div>
           <div class="card" style="overflow:hidden;">
             <table>
-              <thead><tr><th>이름</th><th>팀</th><th>직함</th><th>실무 발표</th><th>AI CAN DO</th></tr></thead>
-              <tbody id="admin-people-nohost-body"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody>
+              <thead><tr><th>이름</th><th>팀</th><th>직함</th><th>실무 발표</th><th>AI CAN DO</th><th>상태</th></tr></thead>
+              <tbody id="admin-people-nohost-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -1121,6 +1130,47 @@ function renderAdminPres(){
   }
   renderGrouped(cache.presentations.filter(p=>p.type!=='AI CAN DO'), 'admin-pres-body-실무');
   renderGrouped(cache.presentations.filter(p=>p.type==='AI CAN DO'), 'admin-pres-body-ai');
+  renderAIcandoCandidates();
+}
+
+const AI_EXTRA_EXCLUDE = ['김태은','우인환'];
+
+function renderAIcandoCandidates(){
+  const tbody = document.getElementById('admin-aicando-candidates');
+  if(!tbody) return;
+
+  // AI CAN DO 발표 경험자 이름 목록
+  const done = new Set(
+    cache.presentations
+      .filter(p=>p.type==='AI CAN DO')
+      .flatMap(p=>p.presenter.split(',').map(n=>n.trim()))
+  );
+
+  // 참가 인원 필터 (제외 팀 + 추가 제외 인원)
+  const candidates = cache.people.filter(p=>
+    !EXCLUDED_TEAMS.includes(p.team) &&
+    !AI_EXTRA_EXCLUDE.includes(p.name) &&
+    !done.has(p.name)
+  ).sort((a,b)=>a.team.localeCompare(b.team,'ko') || a.name.localeCompare(b.name,'ko'));
+
+  if(!candidates.length){
+    tbody.innerHTML='<tr><td colspan="2" style="color:var(--c2);padding:16px;">모두 발표했어요 🎉</td></tr>';
+    return;
+  }
+
+  // 팀별 그룹핑
+  const byTeam={};
+  candidates.forEach(p=>{
+    if(!byTeam[p.team]) byTeam[p.team]=[];
+    byTeam[p.team].push(p);
+  });
+
+  tbody.innerHTML = Object.entries(byTeam).map(([team, members])=>
+    members.map((p,i)=>`<tr>
+      ${i===0?`<td rowspan="${members.length}" style="vertical-align:top;padding-top:14px;color:var(--c3);font-weight:500;font-size:12px;">${team}</td>`:''}
+      <td style="color:var(--c5);">${p.name}</td>
+    </tr>`).join('')
+  ).join('');
 }
 
 function renderAdminHosts(){
@@ -1137,7 +1187,30 @@ function renderAdminHosts(){
 }
 
 // 앉방데이 미참가 팀
-const EXCLUDED_TEAMS = ['품질관리팀','제품기술1팀','제품기술2팀'];
+const EXCLUDED_TEAMS = ['품질관리팀','제품기술1팀','제품기술2팀','제품개발팀'];
+const STATUS_OPTIONS = [
+  { value: '',           label: '—',       color: 'var(--c1)',  text: 'var(--c3)' },
+  { value: '운영자',     label: '운영자',   color: '#dbeafe',   text: '#1e40af' },
+  { value: '바쁜사람',   label: '바쁜사람', color: '#fef3c7',   text: '#92400e' },
+  { value: '휴직',       label: '휴직',     color: '#f3f4f6',   text: '#6b7280' },
+  { value: '퇴사예정',   label: '퇴사예정', color: '#fee2e2',   text: '#991b1b' },
+];
+function statusBadge(status){
+  const s = STATUS_OPTIONS.find(o=>o.value===status) || STATUS_OPTIONS[0];
+  if(!s.value) return '<span style="color:var(--c2);font-size:12px;">—</span>';
+  return `<span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;background:${s.color};color:${s.text};">${s.label}</span>`;
+}
+function statusSelect(personId, current){
+  return `<select onchange="saveStatus('${personId}',this.value)"
+    style="font-size:12px;border:1px solid var(--c1);border-radius:6px;padding:3px 8px;font-family:inherit;color:var(--c5);background:#fff;cursor:pointer;">
+    ${STATUS_OPTIONS.map(o=>`<option value="${o.value}" ${o.value===current?'selected':''}>${o.label||'미설정'}</option>`).join('')}
+  </select>`;
+}
+async function saveStatus(personId, status){
+  await sb.from('anbang_people').update({status: status||null}).eq('id', personId);
+  await loadAll();
+  renderAdminPeople();
+}
 
 let peopleSortKey='name', peopleSortAsc=true;
 let currentPeopleTab='all';
@@ -1217,14 +1290,19 @@ function renderAdminPeople(){
 
   // 앉방마님 미경험자
   const nohost = anbang.filter(p=>!hasHost(p.name) && !['팀장','총괄팀장','반장','조장'].includes(p.title));
-  document.getElementById('admin-people-nohost-body').innerHTML = nohost.length ? nohost.map(p=>`
-    <tr style="background:#fafafa;">
-      <td style="font-weight:500;color:var(--c3);">${p.name}</td>
+  // 상태별 그룹핑: 상태 없는 사람 먼저, 상태 있는 사람은 아래
+  const nohost_normal = nohost.filter(p=>!p.status);
+  const nohost_status = nohost.filter(p=>p.status);
+  const nohostAll = [...nohost_normal, ...nohost_status];
+  document.getElementById('admin-people-nohost-body').innerHTML = nohostAll.length ? nohostAll.map(p=>`
+    <tr style="${p.status?'background:#fafafa;opacity:0.8;':''}">
+      <td style="font-weight:500;color:${p.status?'var(--c2)':'var(--c5)'};">${p.name}</td>
       <td style="color:var(--c3);">${p.team}</td>
       <td style="color:var(--c2);font-size:12px;">${p.title||'—'}</td>
-      <td style="max-width:160px;">${presTagsHtml(p.name,'실무')}</td>
-      <td style="max-width:160px;">${presTagsHtml(p.name,'ai')}</td>
-    </tr>`).join('') : '<tr><td colspan="5" style="color:var(--c2);padding:16px;">모두 경험했어요 🎉</td></tr>';
+      <td style="max-width:140px;">${presTagsHtml(p.name,'실무')}</td>
+      <td style="max-width:140px;">${presTagsHtml(p.name,'ai')}</td>
+      <td style="white-space:nowrap;">${statusSelect(p.id, p.status||'')}</td>
+    </tr>`).join('') : '<tr><td colspan="6" style="color:var(--c2);padding:16px;">모두 경험했어요 🎉</td></tr>';
 }
 
 function switchAdminTab(tab,btn){
