@@ -927,7 +927,7 @@ async function renderEvent(){
           <div class="pres-title">${p.title}</div>
           <div class="pres-presenter">${withTeam(p.presenter)}</div>
         </div>
-        <span class="pres-type">${p.type}</span>
+        ${typePillHtml(p.type)}
         <span class="pres-dur">${p.duration_min?p.duration_min+'분':''}</span>
       </div>`).join('')
     : '<div class="pres-item"><span style="color:var(--w3);font-size:13px;">등록된 발표가 없습니다</span></div>';
@@ -959,7 +959,7 @@ function renderStoryEvents(){
     const presHtml=pres.length
       ? pres.map(p=>`
           <div class="event-pres-item">
-            <span class="type-pill" style="flex-shrink:0;">${p.type}</span>
+            ${typePillHtml(p.type)}
             <div style="flex:1;min-width:0;">
               <div style="font-size:14px;font-weight:600;color:#ffffff;">${p.title}</div>
               <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:3px;">${withTeam(p.presenter, true)}</div>
@@ -1002,7 +1002,7 @@ function renderStoryPres(){
     const items = byMonth[month].sort((a,b) => a.order_num - b.order_num);
     const itemsHtml = items.map(p => `
       <div class="event-pres-item" data-s="${p.title} ${p.presenter} ${month}">
-        <span class="type-pill" style="flex-shrink:0;">${p.type}</span>
+        ${typePillHtml(p.type)}
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:600;color:#ffffff;">${p.title}</div>
           <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:3px;">${withTeam(p.presenter, true)}</div>
@@ -1162,7 +1162,7 @@ function selectEvent(month){
     ?hosts.map(h=>{const info=peopleMap[h.name];return `<span style="font-size:13px;color:var(--c5);">${h.name}</span><span style="font-size:11px;color:var(--c2);margin-left:3px;">${info?'('+info.team+')':''}</span>`;}).join('<span style="color:var(--c1);margin:0 6px;">·</span>')
     :'<span style="color:var(--c2);">등록된 명단 없음</span>';
   const presHtml=pres.length
-    ?pres.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--c1);"><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:#ffffff;">${p.title}</div><div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:3px;">${withTeam(p.presenter, true)}</div></div><span class="tag" style="flex-shrink:0;">${p.type}</span><span style="font-size:12px;color:var(--c2);flex-shrink:0;">${p.duration_min?p.duration_min+'분':''}</span><div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="editPres('${p.id}')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}')">삭제</button></div></div>`).join('')
+    ?pres.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--c1);"><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:#ffffff;">${p.title}</div><div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:3px;">${withTeam(p.presenter, true)}</div></div><span class="tag" style="flex-shrink:0;">${typePillHtml(p.type)}<span style="font-size:12px;color:var(--c2);flex-shrink:0;">${p.duration_min?p.duration_min+'분':''}</span><div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="editPres('${p.id}')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}')">삭제</button></div></div>`).join('')
     :'<div style="color:var(--c2);font-size:13px;padding:12px 0;">등록된 발표 없음</div>';
   document.getElementById('event-detail-content').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
