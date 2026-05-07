@@ -524,12 +524,19 @@ tr:hover td{background:var(--c0);}
       <!-- 발표 관리 -->
       <div id="admin-presentations" style="display:none;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <div class="section-title" style="margin-bottom:0;">발표 목록</div>
+          <div style="display:flex;gap:6px;">
+            <button class="tab active" id="pres-sub-실무" onclick="switchPresTab('실무',this)">실무 발표</button>
+            <button class="tab" id="pres-sub-ai" onclick="switchPresTab('ai',this)">AI CAN DO</button>
+          </div>
           <button class="btn btn-primary btn-sm" onclick="openModal('pres-modal')">+ 발표 추가</button>
         </div>
-        <div class="card" style="overflow:hidden;">
-          <table><thead><tr><th>월</th><th>발표 제목</th><th>발표자</th><th>유형</th><th>시간</th><th></th></tr></thead>
-          <tbody id="admin-pres-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody></table>
+        <div id="pres-sub-실무-body" class="card" style="overflow:hidden;">
+          <table><thead><tr><th>월</th><th>발표 제목</th><th>발표자</th><th>시간</th><th></th></tr></thead>
+          <tbody id="admin-pres-body-실무"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody></table>
+        </div>
+        <div id="pres-sub-ai-body" class="card" style="overflow:hidden;display:none;">
+          <table><thead><tr><th>월</th><th>발표 제목</th><th>발표자</th><th>시간</th><th></th></tr></thead>
+          <tbody id="admin-pres-body-ai"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody></table>
         </div>
       </div>
 
@@ -548,19 +555,48 @@ tr:hover td{background:var(--c0);}
       <!-- 인물-팀 관리 -->
       <div id="admin-people" style="display:none;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="section-title" style="margin-bottom:0;">인물-팀 매칭</div>
-            <div style="display:flex;gap:4px;">
-              <button class="btn btn-ghost btn-sm" onclick="sortPeople('name')" id="sort-name">이름 ↕</button>
-              <button class="btn btn-ghost btn-sm" onclick="sortPeople('team')" id="sort-team">팀 ↕</button>
-              <button class="btn btn-ghost btn-sm" onclick="sortPeople('title')" id="sort-title">직함 ↕</button>
-            </div>
+          <div style="display:flex;gap:6px;">
+            <button class="tab active" id="people-sub-all" onclick="switchPeopleTab('all',this)">전체 인원</button>
+            <button class="tab" id="people-sub-anbang" onclick="switchPeopleTab('anbang',this)">앉방데이 참가 인원</button>
           </div>
           <button class="btn btn-primary btn-sm" onclick="openModal('people-modal')">+ 인물 추가</button>
         </div>
-        <div class="card" style="overflow:hidden;">
-          <table><thead><tr><th>이름</th><th>팀</th><th>직함</th><th>앉방마님</th><th>발표</th><th></th></tr></thead>
-          <tbody id="admin-people-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody></table>
+        <!-- 전체 인원 -->
+        <div id="people-body-all" class="card" style="overflow:hidden;">
+          <table>
+            <thead><tr>
+              <th style="cursor:pointer;" onclick="sortPeople('name')">이름 <span id="sort-name-icon">↕</span></th>
+              <th style="cursor:pointer;" onclick="sortPeople('team')">팀 <span id="sort-team-icon">↕</span></th>
+              <th style="cursor:pointer;" onclick="sortPeople('title')">직함 <span id="sort-title-icon">↕</span></th>
+              <th></th>
+            </tr></thead>
+            <tbody id="admin-people-all-body"><tr><td colspan="4" class="loading">불러오는 중...</td></tr></tbody>
+          </table>
+        </div>
+        <!-- 앉방데이 참가 인원 -->
+        <div id="people-body-anbang" style="display:none;">
+          <div class="card" style="overflow:hidden;margin-bottom:20px;">
+            <table>
+              <thead><tr>
+                <th style="cursor:pointer;" onclick="sortPeople('name')">이름 <span id="sort-name-icon2">↕</span></th>
+                <th style="cursor:pointer;" onclick="sortPeople('team')">팀 <span id="sort-team-icon2">↕</span></th>
+                <th style="cursor:pointer;" onclick="sortPeople('title')">직함 <span id="sort-title-icon2">↕</span></th>
+                <th>앉방마님</th>
+                <th>실무 발표</th>
+                <th>AI CAN DO</th>
+                <th></th>
+              </tr></thead>
+              <tbody id="admin-people-anbang-body"><tr><td colspan="7" class="loading">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
+          <!-- 앉방마님 미경험자 -->
+          <div style="font-size:12px;font-weight:600;color:var(--c2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">앉방마님 미경험</div>
+          <div class="card" style="overflow:hidden;">
+            <table>
+              <thead><tr><th>이름</th><th>팀</th><th>직함</th><th>실무 발표</th><th>AI CAN DO</th></tr></thead>
+              <tbody id="admin-people-nohost-body"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -744,12 +780,8 @@ async function renderHome(){
   document.getElementById('hc-time').textContent=e.time_range||'';
   document.getElementById('hc-location').textContent=e.location||'—';
   document.getElementById('hc-host').textContent=e.host_team||'—';
-  const hosts=cache.hosts.filter(h=>h.event_month===e.month);
-  const lead=hosts.find(h=>h.is_lead);
-  const others=hosts.filter(h=>!h.is_lead);
-  let hnames='';
-  if(lead) hnames=lead.name+(others.length?` 외 ${others.length}인`:'');
-  document.getElementById('hc-host-names').textContent=hnames;
+  const hosts=cache.hosts.filter(h=>h.event_month===e.month).sort((a,b)=>a.order_num-b.order_num);
+  document.getElementById('hc-host-names').textContent=hosts.map(h=>h.name).join(', ');
 }
 
 // ── 행사 안내 렌더 ──
@@ -1027,10 +1059,28 @@ function selectEvent(month){
     <div>${presHtml}</div>`;
 }
 
+function switchPresTab(tab, btn){
+  ['실무','ai'].forEach(t=>{
+    document.getElementById('pres-sub-'+t+'-body').style.display = t===tab?'':'none';
+  });
+  document.querySelectorAll('#admin-presentations .tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
 function renderAdminPres(){
-  document.getElementById('admin-pres-body').innerHTML=cache.presentations.map(p=>`
-    <tr><td><span class="tag" style="font-size:10px;">${p.event_month}</span></td><td>${p.title}</td><td style="color:var(--c3);font-size:12px;">${p.presenter}</td><td><span class="tag">${p.type}</span></td><td style="color:var(--c3);font-size:12px;">${p.duration_min?p.duration_min+'분':'—'}</td>
-    <td style="text-align:right;"><button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPres('${p.id}')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}')">삭제</button></td></tr>`).join('');
+  const makeRow = p => `<tr>
+    <td><span class="tag" style="font-size:10px;">${p.event_month}</span></td>
+    <td>${p.title}</td>
+    <td style="color:var(--c3);font-size:12px;">${p.presenter}</td>
+    <td style="color:var(--c3);font-size:12px;">${p.duration_min?p.duration_min+'분':'—'}</td>
+    <td style="text-align:right;white-space:nowrap;">
+      <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPres('${p.id}')">수정</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}')">삭제</button>
+    </td></tr>`;
+  const real = cache.presentations.filter(p=>p.type!=='AI CAN DO');
+  const ai   = cache.presentations.filter(p=>p.type==='AI CAN DO');
+  document.getElementById('admin-pres-body-실무').innerHTML = real.length ? real.map(makeRow).join('') : '<tr><td colspan="5" style="color:var(--c2);padding:16px;">등록된 발표 없음</td></tr>';
+  document.getElementById('admin-pres-body-ai').innerHTML   = ai.length   ? ai.map(makeRow).join('')   : '<tr><td colspan="5" style="color:var(--c2);padding:16px;">등록된 발표 없음</td></tr>';
 }
 
 function renderAdminHosts(){
@@ -1046,23 +1096,95 @@ function renderAdminHosts(){
   }).join('');
 }
 
-let peopleSortKey='name',peopleSortAsc=true;
-function sortPeople(key){
-  if(peopleSortKey===key){peopleSortAsc=!peopleSortAsc;}else{peopleSortKey=key;peopleSortAsc=true;}
-  const labels={name:'이름',team:'팀',title:'직함'};
-  ['name','team','title'].forEach(k=>{const btn=document.getElementById('sort-'+k);if(btn)btn.textContent=labels[k]+(k===peopleSortKey?(peopleSortAsc?' ↑':' ↓'):' ↕');});
+// 앉방데이 미참가 팀
+const EXCLUDED_TEAMS = ['품질관리팀','제품기술1팀','제품기술2팀'];
+
+let peopleSortKey='name', peopleSortAsc=true;
+let currentPeopleTab='all';
+
+function switchPeopleTab(tab, btn){
+  currentPeopleTab=tab;
+  document.getElementById('people-body-all').style.display    = tab==='all'    ? '' : 'none';
+  document.getElementById('people-body-anbang').style.display = tab==='anbang' ? '' : 'none';
+  document.querySelectorAll('#admin-people .tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
   renderAdminPeople();
 }
+
+function sortPeople(key){
+  if(peopleSortKey===key){peopleSortAsc=!peopleSortAsc;}else{peopleSortKey=key;peopleSortAsc=true;}
+  const icon = peopleSortAsc ? '↑' : '↓';
+  ['name','team','title'].forEach(k=>{
+    ['','2'].forEach(sfx=>{
+      const el=document.getElementById('sort-'+k+'-icon'+sfx);
+      if(el) el.textContent = k===peopleSortKey ? icon : '↕';
+    });
+  });
+  renderAdminPeople();
+}
+
+function sortedPeople(list){
+  return [...list].sort((a,b)=>{
+    const va=(a[peopleSortKey]||'').toLowerCase(), vb=(b[peopleSortKey]||'').toLowerCase();
+    return peopleSortAsc ? va.localeCompare(vb,'ko') : vb.localeCompare(va,'ko');
+  });
+}
+
+function presTagsHtml(name, typeFilter){
+  const items = cache.presentations
+    .filter(pr => pr.presenter.split(',').map(n=>n.trim()).includes(name) && (typeFilter==='ai'?pr.type==='AI CAN DO':pr.type!=='AI CAN DO'))
+    .sort((a,b)=>b.event_month.localeCompare(a.event_month));
+  return items.length
+    ? items.map(pr=>`<div style="font-size:11px;color:var(--c3);margin-bottom:2px;"><span style="color:var(--c2);">${fmtMonth(pr.event_month)}</span><br>${pr.title}</div>`).join('')
+    : '<span style="color:var(--c2);font-size:12px;">—</span>';
+}
+
 function renderAdminPeople(){
-  const sorted=[...cache.people].sort((a,b)=>{const va=(a[peopleSortKey]||'').toLowerCase(),vb=(b[peopleSortKey]||'').toLowerCase();return peopleSortAsc?va.localeCompare(vb,'ko'):vb.localeCompare(va,'ko');});
-  document.getElementById('admin-people-body').innerHTML=sorted.map(p=>{
-    const hostMonths=cache.hosts.filter(h=>h.name===p.name).map(h=>h.event_month).sort((a,b)=>b.localeCompare(a));
-    const hostHtml=hostMonths.length?hostMonths.map(m=>`<span class="tag" style="font-size:10px;margin-right:2px;">${fmtMonth(m)}</span>`).join(''):'<span style="color:var(--c2);font-size:12px;">—</span>';
-    const presItems=cache.presentations.filter(pr=>pr.presenter.split(',').map(n=>n.trim()).includes(p.name)).sort((a,b)=>b.event_month.localeCompare(a.event_month));
-    const presHtml=presItems.length?presItems.map(pr=>`<div style="font-size:11px;color:var(--c3);margin-bottom:2px;"><span style="color:var(--c2);">${fmtMonth(pr.event_month)}</span> ${pr.title}</div>`).join(''):'<span style="color:var(--c2);font-size:12px;">—</span>';
-    return `<tr><td style="font-weight:500;">${p.name}</td><td style="color:var(--c3);">${p.team}</td><td style="color:var(--c3);font-size:12px;">${p.title||'—'}</td><td style="max-width:180px;">${hostHtml}</td><td style="max-width:220px;">${presHtml}</td>
-    <td style="text-align:right;white-space:nowrap;"><button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPerson('${p.id}')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_people','${p.id}')">삭제</button></td></tr>`;
-  }).join('');
+  const all = sortedPeople(cache.people);
+  const anbang = sortedPeople(cache.people.filter(p=>!EXCLUDED_TEAMS.includes(p.team)));
+  const hasHost = name => cache.hosts.some(h=>h.name===name);
+
+  // 전체 인원 탭
+  document.getElementById('admin-people-all-body').innerHTML = all.map(p=>`
+    <tr>
+      <td style="font-weight:500;">${p.name}</td>
+      <td style="color:var(--c3);">${p.team}</td>
+      <td style="color:var(--c3);font-size:12px;">${p.title||'—'}</td>
+      <td style="text-align:right;white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPerson('${p.id}')">수정</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_people','${p.id}')">삭제</button>
+      </td>
+    </tr>`).join('');
+
+  // 앉방데이 참가 인원 (경험자)
+  const experienced = anbang.filter(p=>hasHost(p.name));
+  document.getElementById('admin-people-anbang-body').innerHTML = experienced.length ? experienced.map(p=>{
+    const hostMonths = cache.hosts.filter(h=>h.name===p.name).sort((a,b)=>b.event_month.localeCompare(a.event_month));
+    const hostHtml = hostMonths.map(m=>`<span class="tag" style="font-size:10px;margin-right:2px;">${fmtMonth(m.event_month)}</span>`).join('');
+    return `<tr>
+      <td style="font-weight:500;">${p.name}</td>
+      <td style="color:var(--c3);">${p.team}</td>
+      <td style="color:var(--c3);font-size:12px;">${p.title||'—'}</td>
+      <td style="max-width:160px;">${hostHtml}</td>
+      <td style="max-width:160px;">${presTagsHtml(p.name,'실무')}</td>
+      <td style="max-width:160px;">${presTagsHtml(p.name,'ai')}</td>
+      <td style="text-align:right;white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPerson('${p.id}')">수정</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_people','${p.id}')">삭제</button>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" style="color:var(--c2);padding:16px;">없음</td></tr>';
+
+  // 앉방마님 미경험자
+  const nohost = anbang.filter(p=>!hasHost(p.name));
+  document.getElementById('admin-people-nohost-body').innerHTML = nohost.length ? nohost.map(p=>`
+    <tr style="background:#fafafa;">
+      <td style="font-weight:500;color:var(--c3);">${p.name}</td>
+      <td style="color:var(--c3);">${p.team}</td>
+      <td style="color:var(--c2);font-size:12px;">${p.title||'—'}</td>
+      <td style="max-width:160px;">${presTagsHtml(p.name,'실무')}</td>
+      <td style="max-width:160px;">${presTagsHtml(p.name,'ai')}</td>
+    </tr>`).join('') : '<tr><td colspan="5" style="color:var(--c2);padding:16px;">모두 경험했어요 🎉</td></tr>';
 }
 
 function switchAdminTab(tab,btn){
