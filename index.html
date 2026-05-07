@@ -69,14 +69,14 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .hero-inner{position:relative;z-index:1;max-width:960px;margin:0 auto;width:100%;display:flex;flex-direction:column;justify-content:center;min-height:100vh;padding:80px 0;}
 .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--c2);margin-bottom:28px;}
 .hero-dot{width:6px;height:6px;border-radius:50%;background:#fff;opacity:0.4;}
-.hero-title{font-size:clamp(72px,16vw,200px);font-weight:900;line-height:0.9;letter-spacing:-4px;color:#ffffff;margin-bottom:0;}
-.hero-title-sub{font-size:clamp(72px,16vw,200px);font-weight:300;line-height:0.9;letter-spacing:-4px;color:rgba(255,255,255,0.65);}
+.hero-title{font-size:clamp(56px,15vw,180px);font-weight:900;line-height:0.9;letter-spacing:-3px;color:#ffffff;margin-bottom:0;}
+.hero-title-sub{font-size:clamp(56px,15vw,180px);font-weight:300;line-height:0.9;letter-spacing:-3px;color:rgba(255,255,255,0.65);}
 .hero-desc{font-size:16px;color:rgba(255,255,255,0.75);line-height:1.8;margin-top:32px;max-width:480px;}
 .hero-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);border-radius:12px;overflow:hidden;margin-top:48px;max-width:600px;}
 .hero-card{background:rgba(255,255,255,0.07);padding:20px 24px;}
 .hero-card-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--w3);margin-bottom:8px;}
-.hero-card-val{font-size:15px;font-weight:600;color:#ffffff;}
-.hero-card-sub{font-size:12px;color:rgba(255,255,255,0.7);margin-top:3px;}
+.hero-card-val{font-size:17px;font-weight:700;color:#ffffff;}
+.hero-card-sub{font-size:14px;color:rgba(255,255,255,0.75);margin-top:4px;}
 .hero-cta{display:flex;gap:12px;margin-top:40px;flex-wrap:wrap;}
 .btn-main{padding:12px 28px;background:#ffffff;color:#1e2540;font-size:14px;font-weight:700;border-radius:8px;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s;}
 .btn-main:hover{opacity:0.88;}
@@ -85,8 +85,8 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 
 /* ── 섹션 헤더 ── */
 .sec-eyebrow{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--c3);margin-bottom:16px;font-family:var(--font-en);}
-.sec-title{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-1px;color:var(--c5);line-height:1.1;margin-bottom:12px;}
-.sec-sub{font-size:15px;color:var(--c4);line-height:1.7;}
+.sec-title{font-size:clamp(32px,4.5vw,56px);font-weight:800;letter-spacing:-1px;color:var(--c5);line-height:1.1;margin-bottom:16px;}
+.sec-sub{font-size:16px;color:var(--c4);line-height:1.7;}
 
 /* ── 행사 안내 섹션 ── */
 #sec-event{background:transparent;}
@@ -99,8 +99,8 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .pres-item:hover{background:#f8f9fc;}
 .pres-num{font-size:11px;font-weight:700;color:var(--c3);min-width:20px;}
 .pres-info{flex:1;min-width:0;}
-.pres-title{font-size:15px;font-weight:600;color:var(--c5);}
-.pres-presenter{font-size:13px;color:var(--c3);margin-top:4px;}
+.pres-title{font-size:16px;font-weight:600;color:var(--c5);}
+.pres-presenter{font-size:14px;color:var(--c3);margin-top:4px;}
 .pres-type{font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;border:1px solid var(--c1);color:var(--c3);background:#fff;white-space:nowrap;}
 .pres-dur{font-size:12px;color:var(--c2);white-space:nowrap;}
 
@@ -119,19 +119,19 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .guide-card-body{display:none;padding:0 24px 22px;border-top:1px solid rgba(30,37,64,0.07);}
 .guide-card.open .guide-card-body{display:block;}
 .guide-card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding-top:18px;}
-.guide-card-desc{font-size:13px;color:var(--c3);line-height:1.8;}
+.guide-card-desc{font-size:14px;color:var(--c3);line-height:1.8;}
 .guide-card-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--c2);margin-bottom:8px;}
 .guide-card-name{font-size:17px;font-weight:700;color:var(--c5);margin-bottom:6px;}
 .guide-card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 .guide-card-meta-tag{font-size:11px;font-weight:600;color:var(--c3);background:var(--c0);border:1px solid var(--c1);border-radius:999px;padding:3px 10px;white-space:nowrap;}
-.guide-card-desc{font-size:13px;color:var(--c3);line-height:1.8;}
+.guide-card-desc{font-size:14px;color:var(--c3);line-height:1.8;}
 .schedule-list{margin-top:0;display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;}
 .schedule-item{display:flex;align-items:flex-start;gap:24px;padding:20px 28px;background:#fff;}
 .schedule-item.highlight{background:#eef0f8;}
-.schedule-day{font-size:12px;font-weight:700;color:var(--c3);min-width:44px;padding-top:2px;}
+.schedule-day{font-size:13px;font-weight:700;color:var(--c3);min-width:44px;padding-top:2px;}
 .schedule-item.highlight .schedule-day{color:var(--c4);font-weight:800;}
-.schedule-content-title{font-size:14px;font-weight:600;color:var(--c5);}
-.schedule-content-sub{font-size:12px;color:var(--c3);margin-top:3px;}
+.schedule-content-title{font-size:15px;font-weight:600;color:var(--c5);}
+.schedule-content-sub{font-size:13px;color:var(--c3);margin-top:3px;}
 .submit-row{display:grid;grid-template-columns:1fr;gap:12px;margin-top:0;}
 .submit-card{border:1px solid rgba(30,37,64,0.1);border-radius:12px;padding:20px 24px;background:#fff;}
 .submit-card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c3);margin-bottom:10px;}
@@ -154,11 +154,11 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .event-row-header{display:flex;align-items:center;gap:28px;padding:20px 28px;transition:background 0.15s;}
 .event-row-header:hover{background:rgba(255,255,255,0.08);}
 .event-row.open .event-row-header{background:rgba(255,255,255,0.1);}
-.event-row-month{font-size:15px;font-weight:700;color:#ffffff;min-width:160px;flex-shrink:0;}
-.event-row-date{font-size:12px;color:rgba(255,255,255,0.6);}
+.event-row-month{font-size:16px;font-weight:700;color:#ffffff;min-width:160px;flex-shrink:0;}
+.event-row-date{font-size:13px;color:rgba(255,255,255,0.65);}
 .event-row-divider{width:1px;height:28px;background:rgba(255,255,255,0.25);flex-shrink:0;}
-.event-row-host{font-size:13px;color:rgba(255,255,255,0.8);flex:1;}
-.event-row-count{font-size:12px;color:rgba(255,255,255,0.6);flex-shrink:0;}
+.event-row-host{font-size:14px;color:rgba(255,255,255,0.85);flex:1;}
+.event-row-count{font-size:13px;color:rgba(255,255,255,0.65);flex-shrink:0;}
 .event-row-chevron{font-size:13px;color:rgba(255,255,255,0.6);transition:transform 0.2s;flex-shrink:0;}
 .event-row.open .event-row-chevron{transform:rotate(180deg);}
 .event-row-body{display:none;border-top:1px solid rgba(255,255,255,0.08);padding:16px 28px 20px;}
@@ -172,10 +172,10 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 /* 앉방마님 목록 */
 .host-rows{display:grid;gap:1px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;}
 .host-row{display:flex;align-items:flex-start;gap:28px;padding:18px 28px;background:rgba(255,255,255,0.05);}
-.host-row-month{font-size:13px;font-weight:600;color:#ffffff;min-width:160px;flex-shrink:0;}
-.host-row-names{font-size:13px;color:rgba(255,255,255,0.85);flex:1;line-height:1.7;}
-.team-hint{font-size:11px;color:rgba(255,255,255,0.6);margin-left:3px;}
-.type-pill{font-size:11px;font-weight:600;padding:2px 9px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.12);white-space:nowrap;flex-shrink:0;}
+.host-row-month{font-size:15px;font-weight:600;color:#ffffff;min-width:160px;flex-shrink:0;}
+.host-row-names{font-size:15px;color:rgba(255,255,255,0.9);flex:1;line-height:1.7;}
+.team-hint{font-size:12px;color:rgba(255,255,255,0.65);margin-left:2px;}
+.type-pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
 
 /* ── 섹션 구분선 ── */
 .sec-divider{display:none;}
@@ -728,12 +728,23 @@ function fmtMonth(m){
   const [y,mo]=m.split('.');
   return y.slice(2)+'년 '+parseInt(mo)+'월 앉방데이';
 }
+function typePillHtml(type){
+  const styles = {
+    'KGI':      'background:rgba(59,130,246,0.25);color:#93c5fd;border:1px solid rgba(59,130,246,0.35);',
+    'AI CAN DO':'background:rgba(139,92,246,0.25);color:#c4b5fd;border:1px solid rgba(139,92,246,0.35);',
+    '실무공유': 'background:rgba(16,185,129,0.25);color:#6ee7b7;border:1px solid rgba(16,185,129,0.35);',
+    '전략':     'background:rgba(245,158,11,0.25);color:#fcd34d;border:1px solid rgba(245,158,11,0.35);',
+    '기타':     'background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.2);',
+  };
+  const s = styles[type] || styles['기타'];
+  return `<span class="type-pill" style="${s}">${type}</span>`;
+}
 function withTeam(nameStr){
   if(!nameStr) return '';
   return nameStr.split(',').map(n=>{
     const name=n.trim();
     const info=peopleMap[name];
-    return info?`${name}<span class="team-hint">(${info.team})</span>`:name;
+    return info?`${name}<span class="team-hint"> · ${info.team}</span>`:name;
   }).join(', ');
 }
 
@@ -880,7 +891,7 @@ async function renderHome(){
     document.getElementById('hc-host').textContent=hosts.map(h=>h.name).join(', ');
     const teamLines=hosts.map(h=>{
       const info=peopleMap[h.name];
-      return info?`${h.name} <span style="color:var(--c2);">· ${info.team}</span>`:h.name;
+      return info?`${h.name} <span style="font-size:13px;color:rgba(255,255,255,0.65);">· ${info.team}</span>`:h.name;
     }).join('<br>');
     document.getElementById('hc-host-names').innerHTML=teamLines;
   } else {
@@ -944,8 +955,8 @@ function renderStoryEvents(){
           <div class="event-pres-item">
             <span class="type-pill" style="flex-shrink:0;">${p.type}</span>
             <div style="flex:1;min-width:0;">
-              <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
-              <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
+              <div style="font-size:14px;font-weight:600;color:#ffffff;">${p.title}</div>
+              <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:3px;">${withTeam(p.presenter)}</div>
             </div>
           </div>`).join('')
       : '<div style="font-size:13px;color:var(--c2);padding:4px 0;">등록된 발표가 없습니다</div>';
@@ -987,8 +998,8 @@ function renderStoryPres(){
       <div class="event-pres-item" data-s="${p.title} ${p.presenter} ${month}">
         <span class="type-pill" style="flex-shrink:0;">${p.type}</span>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
-          <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
+          <div style="font-size:14px;font-weight:600;color:#ffffff;">${p.title}</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:3px;">${withTeam(p.presenter)}</div>
         </div>
       </div>`).join('');
     return `
@@ -1023,8 +1034,8 @@ function renderStoryAI(){
     const itemsHtml = items.map(p => `
       <div class="event-pres-item" data-s="${p.title} ${p.presenter} ${month}">
         <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div>
-          <div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div>
+          <div style="font-size:14px;font-weight:600;color:#ffffff;">${p.title}</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:3px;">${withTeam(p.presenter)}</div>
         </div>
       </div>`).join('');
     return `
@@ -1145,7 +1156,7 @@ function selectEvent(month){
     ?hosts.map(h=>{const info=peopleMap[h.name];return `<span style="font-size:13px;color:var(--c5);">${h.name}</span><span style="font-size:11px;color:var(--c2);margin-left:3px;">${info?'('+info.team+')':''}</span>`;}).join('<span style="color:var(--c1);margin:0 6px;">·</span>')
     :'<span style="color:var(--c2);">등록된 명단 없음</span>';
   const presHtml=pres.length
-    ?pres.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--c1);"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;color:var(--c5);">${p.title}</div><div style="font-size:12px;color:var(--c3);margin-top:2px;">${withTeam(p.presenter)}</div></div><span class="tag" style="flex-shrink:0;">${p.type}</span><span style="font-size:12px;color:var(--c2);flex-shrink:0;">${p.duration_min?p.duration_min+'분':''}</span><div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="editPres('${p.id}')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}')">삭제</button></div></div>`).join('')
+    ?pres.map(p=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--c1);"><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:#ffffff;">${p.title}</div><div style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:3px;">${withTeam(p.presenter)}</div></div><span class="tag" style="flex-shrink:0;">${p.type}</span><span style="font-size:12px;color:var(--c2);flex-shrink:0;">${p.duration_min?p.duration_min+'분':''}</span><div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="editPres('${p.id}')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}')">삭제</button></div></div>`).join('')
     :'<div style="color:var(--c2);font-size:13px;padding:12px 0;">등록된 발표 없음</div>';
   document.getElementById('event-detail-content').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
