@@ -70,13 +70,13 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--c2);margin-bottom:28px;}
 .hero-dot{width:6px;height:6px;border-radius:50%;background:#fff;opacity:0.4;}
 .hero-title{font-size:clamp(72px,16vw,200px);font-weight:900;line-height:0.9;letter-spacing:-4px;color:#ffffff;margin-bottom:0;}
-.hero-title-sub{font-size:clamp(72px,16vw,200px);font-weight:300;line-height:0.9;letter-spacing:-4px;color:rgba(255,255,255,0.45);}
-.hero-desc{font-size:16px;color:rgba(255,255,255,0.55);line-height:1.8;margin-top:32px;max-width:480px;}
+.hero-title-sub{font-size:clamp(72px,16vw,200px);font-weight:300;line-height:0.9;letter-spacing:-4px;color:rgba(255,255,255,0.65);}
+.hero-desc{font-size:16px;color:rgba(255,255,255,0.75);line-height:1.8;margin-top:32px;max-width:480px;}
 .hero-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);border-radius:12px;overflow:hidden;margin-top:48px;max-width:600px;}
 .hero-card{background:rgba(255,255,255,0.07);padding:20px 24px;}
 .hero-card-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--w3);margin-bottom:8px;}
 .hero-card-val{font-size:15px;font-weight:600;color:#ffffff;}
-.hero-card-sub{font-size:12px;color:rgba(255,255,255,0.5);margin-top:3px;}
+.hero-card-sub{font-size:12px;color:rgba(255,255,255,0.7);margin-top:3px;}
 .hero-cta{display:flex;gap:12px;margin-top:40px;flex-wrap:wrap;}
 .btn-main{padding:12px 28px;background:#ffffff;color:#1e2540;font-size:14px;font-weight:700;border-radius:8px;border:none;cursor:pointer;font-family:inherit;transition:opacity 0.15s;}
 .btn-main:hover{opacity:0.88;}
@@ -84,20 +84,20 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .btn-outline:hover{border-color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.08);}
 
 /* ── 섹션 헤더 ── */
-.sec-eyebrow{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--w3);margin-bottom:16px;font-family:var(--font-en);}
+.sec-eyebrow{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--c3);margin-bottom:16px;font-family:var(--font-en);}
 .sec-title{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-1px;color:var(--c5);line-height:1.1;margin-bottom:12px;}
-.sec-sub{font-size:15px;color:var(--c3);line-height:1.7;}
+.sec-sub{font-size:15px;color:var(--c4);line-height:1.7;}
 
 /* ── 행사 안내 섹션 ── */
 #sec-event{background:transparent;}
 .theme-box{border:1px solid rgba(30,37,64,0.1);border-radius:16px;padding:40px 48px;margin:48px 0 40px;background:#fff;position:relative;overflow:hidden;}
 .theme-box::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(30,37,64,0.03) 0%,transparent 70%);}
-.theme-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--c2);margin-bottom:12px;}
+.theme-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.6);margin-bottom:12px;}
 .theme-title{font-size:clamp(22px,3vw,36px);font-weight:800;letter-spacing:-0.5px;color:var(--c5);}
 .pres-list{display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;}
 .pres-item{display:flex;align-items:center;gap:20px;padding:20px 28px;background:#fff;transition:background 0.15s;}
 .pres-item:hover{background:#f8f9fc;}
-.pres-num{font-size:11px;font-weight:700;color:var(--c2);min-width:20px;}
+.pres-num{font-size:11px;font-weight:700;color:var(--c3);min-width:20px;}
 .pres-info{flex:1;min-width:0;}
 .pres-title{font-size:15px;font-weight:600;color:var(--c5);}
 .pres-presenter{font-size:13px;color:var(--c3);margin-top:4px;}
@@ -112,9 +112,9 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .guide-card-header{display:flex;align-items:center;justify-content:space-between;padding:22px 24px;transition:background 0.15s;user-select:none;}
 .guide-card-header:hover{background:#f8f9fc;}
 .guide-card-header-left{display:flex;align-items:center;gap:16px;}
-.guide-card-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--c2);min-width:52px;}
+.guide-card-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--c3);min-width:52px;}
 .guide-card-name{font-size:16px;font-weight:700;color:var(--c5);}
-.guide-card-chevron{font-size:14px;color:var(--c2);transition:transform 0.25s;flex-shrink:0;}
+.guide-card-chevron{font-size:14px;color:var(--c3);transition:transform 0.25s;flex-shrink:0;}
 .guide-card.open .guide-card-chevron{transform:rotate(180deg);}
 .guide-card-body{display:none;padding:0 24px 22px;border-top:1px solid rgba(30,37,64,0.07);}
 .guide-card.open .guide-card-body{display:block;}
@@ -128,24 +128,24 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .schedule-list{margin-top:0;display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;}
 .schedule-item{display:flex;align-items:flex-start;gap:24px;padding:20px 28px;background:#fff;}
 .schedule-item.highlight{background:#eef0f8;}
-.schedule-day{font-size:12px;font-weight:700;color:var(--c2);min-width:44px;padding-top:2px;}
-.schedule-item.highlight .schedule-day{color:var(--c4);}
+.schedule-day{font-size:12px;font-weight:700;color:var(--c3);min-width:44px;padding-top:2px;}
+.schedule-item.highlight .schedule-day{color:var(--c4);font-weight:800;}
 .schedule-content-title{font-size:14px;font-weight:600;color:var(--c5);}
 .schedule-content-sub{font-size:12px;color:var(--c3);margin-top:3px;}
 .submit-row{display:grid;grid-template-columns:1fr;gap:12px;margin-top:0;}
 .submit-card{border:1px solid rgba(30,37,64,0.1);border-radius:12px;padding:20px 24px;background:#fff;}
-.submit-card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c2);margin-bottom:10px;}
+.submit-card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c3);margin-bottom:10px;}
 .submit-card-body{font-size:13px;color:var(--w2);line-height:2.0;}
 
 /* ── 지난 앉방데이 섹션 ── */
 #sec-story{background:transparent;}
 .story-search{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:12px 18px;font-size:14px;font-family:inherit;color:#ffffff;outline:none;transition:border-color 0.15s;margin-bottom:20px;}
-.story-search::placeholder{color:rgba(255,255,255,0.35);}
+.story-search::placeholder{color:rgba(255,255,255,0.5);}
 .story-search:focus{border-color:rgba(255,255,255,0.4);}
 .story-tabs{display:flex;gap:4px;margin-bottom:28px;flex-wrap:wrap;}
-.s-tab{padding:8px 16px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.5);border-radius:6px;cursor:pointer;border:1px solid transparent;background:transparent;transition:all 0.15s;font-family:inherit;}
+.s-tab{padding:8px 16px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.65);border-radius:6px;cursor:pointer;border:1px solid transparent;background:transparent;transition:all 0.15s;font-family:inherit;}
 .s-tab:hover{color:#ffffff;background:rgba(255,255,255,0.08);}
-.s-tab.active{color:#ffffff;border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);font-weight:600;}
+.s-tab.active{color:#ffffff;border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);font-weight:600;}
 .story-panel{display:none;}
 .story-panel.active{display:block;}
 /* 행사 목록 */
@@ -155,11 +155,11 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .event-row-header:hover{background:rgba(255,255,255,0.08);}
 .event-row.open .event-row-header{background:rgba(255,255,255,0.1);}
 .event-row-month{font-size:15px;font-weight:700;color:#ffffff;min-width:160px;flex-shrink:0;}
-.event-row-date{font-size:12px;color:rgba(255,255,255,0.4);}
-.event-row-divider{width:1px;height:28px;background:rgba(255,255,255,0.15);flex-shrink:0;}
-.event-row-host{font-size:13px;color:rgba(255,255,255,0.6);flex:1;}
-.event-row-count{font-size:12px;color:rgba(255,255,255,0.4);flex-shrink:0;}
-.event-row-chevron{font-size:13px;color:rgba(255,255,255,0.4);transition:transform 0.2s;flex-shrink:0;}
+.event-row-date{font-size:12px;color:rgba(255,255,255,0.6);}
+.event-row-divider{width:1px;height:28px;background:rgba(255,255,255,0.25);flex-shrink:0;}
+.event-row-host{font-size:13px;color:rgba(255,255,255,0.8);flex:1;}
+.event-row-count{font-size:12px;color:rgba(255,255,255,0.6);flex-shrink:0;}
+.event-row-chevron{font-size:13px;color:rgba(255,255,255,0.6);transition:transform 0.2s;flex-shrink:0;}
 .event-row.open .event-row-chevron{transform:rotate(180deg);}
 .event-row-body{display:none;border-top:1px solid rgba(255,255,255,0.08);padding:16px 28px 20px;}
 .event-row.open .event-row-body{display:block;}
@@ -173,16 +173,16 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .host-rows{display:grid;gap:1px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;}
 .host-row{display:flex;align-items:flex-start;gap:28px;padding:18px 28px;background:rgba(255,255,255,0.05);}
 .host-row-month{font-size:13px;font-weight:600;color:#ffffff;min-width:160px;flex-shrink:0;}
-.host-row-names{font-size:13px;color:rgba(255,255,255,0.65);flex:1;line-height:1.7;}
-.team-hint{font-size:11px;color:rgba(255,255,255,0.4);margin-left:3px;}
-.type-pill{font-size:11px;font-weight:600;padding:2px 9px;border-radius:4px;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.08);white-space:nowrap;flex-shrink:0;}
+.host-row-names{font-size:13px;color:rgba(255,255,255,0.85);flex:1;line-height:1.7;}
+.team-hint{font-size:11px;color:rgba(255,255,255,0.6);margin-left:3px;}
+.type-pill{font-size:11px;font-weight:600;padding:2px 9px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.12);white-space:nowrap;flex-shrink:0;}
 
 /* ── 섹션 구분선 ── */
 .sec-divider{display:none;}
 
 /* ── 스크롤 인디케이터 ── */
-.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,0.3);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;}
-.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,rgba(255,255,255,0.3),transparent);}
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;}
+.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,rgba(255,255,255,0.5),transparent);}
 
 /* ── 운영관리 (팝업 레이어) ── */
 #admin-overlay{display:none;position:fixed;inset:0;z-index:200;background:var(--c0);overflow-y:auto;}
@@ -331,7 +331,7 @@ tr:hover td{background:var(--c0);}
 <section id="sec-story">
   <div class="inner">
     <div class="sec-eyebrow">아카이브</div>
-    <div class="sec-title" style="margin-bottom:32px;color:#ffffff;">지난 앉방데이</div>
+    <div class="sec-title" style="margin-bottom:32px;color:#ffffff;font-weight:800;">지난 앉방데이</div>
     <input class="story-search" id="q" oninput="filterStory()" placeholder="발표 제목, 발표자, 팀 이름으로 검색"/>
     <div class="story-tabs">
       <button class="s-tab active" onclick="switchTab('events',this)">앉방데이</button>
@@ -842,7 +842,7 @@ function updateBg(){
 
   // 네비 색상도 부드럽게
   const nav = document.getElementById('nav');
-  const isLight = rgb[0] > 150;
+  const isLight = rgb[0] > 160;
   if(window.scrollY > 60){
     nav.classList.add('scrolled');
   } else {
@@ -853,7 +853,7 @@ function updateBg(){
   const navLinks = document.querySelectorAll('.nav-link');
   const navLines = document.querySelectorAll('.nav-menu-btn span');
   const txtColor = isLight ? '#1e2540' : '#ffffff';
-  const subColor = isLight ? 'rgba(30,37,64,0.6)' : 'rgba(255,255,255,0.6)';
+  const subColor = isLight ? 'rgba(30,37,64,0.75)' : 'rgba(255,255,255,0.75)';
   if(navLogo) navLogo.style.color = txtColor;
   navLinks.forEach(l => l.style.color = subColor);
   navLines.forEach(l => l.style.background = txtColor);
