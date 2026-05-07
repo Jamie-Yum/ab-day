@@ -779,9 +779,16 @@ async function renderHome(){
   document.getElementById('hc-date').textContent=e.date||'—';
   document.getElementById('hc-time').textContent=e.time_range||'';
   document.getElementById('hc-location').textContent=e.location||'—';
-  document.getElementById('hc-host').textContent=e.host_team||'—';
   const hosts=cache.hosts.filter(h=>h.event_month===e.month).sort((a,b)=>a.order_num-b.order_num);
-  document.getElementById('hc-host-names').textContent=hosts.map(h=>h.name).join(', ');
+  if(hosts.length){
+    document.getElementById('hc-host').textContent=hosts.map(h=>h.name).join(', ');
+    // 팀명: 중복 제거해서 표시
+    const teams=[...new Set(hosts.map(h=>{ const info=peopleMap[h.name]; return info?info.team:''; }).filter(Boolean))];
+    document.getElementById('hc-host-names').textContent=teams.join(' · ');
+  } else {
+    document.getElementById('hc-host').textContent=e.host_team||'—';
+    document.getElementById('hc-host-names').textContent='';
+  }
 }
 
 // ── 행사 안내 렌더 ──
