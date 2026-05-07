@@ -531,11 +531,11 @@ tr:hover td{background:var(--c0);}
           <button class="btn btn-primary btn-sm" onclick="openModal('pres-modal')">+ 발표 추가</button>
         </div>
         <div id="pres-sub-실무-body" class="card" style="overflow:hidden;">
-          <table><thead><tr><th>월</th><th>발표 제목</th><th>발표자</th><th>시간</th><th></th></tr></thead>
+          <table><thead><tr><th>행사</th><th>날짜</th><th>발표 제목</th><th>발표자</th><th>시간</th><th></th></tr></thead>
           <tbody id="admin-pres-body-실무"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody></table>
         </div>
         <div id="pres-sub-ai-body" class="card" style="overflow:hidden;display:none;">
-          <table><thead><tr><th>월</th><th>발표 제목</th><th>발표자</th><th>시간</th><th></th></tr></thead>
+          <table><thead><tr><th>행사</th><th>날짜</th><th>발표 제목</th><th>발표자</th><th>시간</th><th></th></tr></thead>
           <tbody id="admin-pres-body-ai"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody></table>
         </div>
       </div>
@@ -1068,19 +1068,37 @@ function switchPresTab(tab, btn){
 }
 
 function renderAdminPres(){
-  const makeRow = p => `<tr>
-    <td><span class="tag" style="font-size:10px;">${p.event_month}</span></td>
-    <td>${p.title}</td>
-    <td style="color:var(--c3);font-size:12px;">${p.presenter}</td>
-    <td style="color:var(--c3);font-size:12px;">${p.duration_min?p.duration_min+'분':'—'}</td>
-    <td style="text-align:right;white-space:nowrap;">
-      <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPres('${p.id}')">수정</button>
-      <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}')">삭제</button>
-    </td></tr>`;
-  const real = cache.presentations.filter(p=>p.type!=='AI CAN DO');
-  const ai   = cache.presentations.filter(p=>p.type==='AI CAN DO');
-  document.getElementById('admin-pres-body-실무').innerHTML = real.length ? real.map(makeRow).join('') : '<tr><td colspan="5" style="color:var(--c2);padding:16px;">등록된 발표 없음</td></tr>';
-  document.getElementById('admin-pres-body-ai').innerHTML   = ai.length   ? ai.map(makeRow).join('')   : '<tr><td colspan="5" style="color:var(--c2);padding:16px;">등록된 발표 없음</td></tr>';
+  // 월별 그룹핑 렌더
+  function renderGrouped(list, bodyId){
+    const byMonth = {};
+    list.forEach(p => { if(!byMonth[p.event_month]) byMonth[p.event_month]=[]; byMonth[p.event_month].push(p); });
+    const months = Object.keys(byMonth).sort((a,b)=>b.localeCompare(a));
+    if(!months.length){
+      document.getElementById(bodyId).innerHTML = '<tr><td colspan="6" style="color:var(--c2);padding:16px;">등록된 발표 없음</td></tr>';
+      return;
+    }
+    document.getElementById(bodyId).innerHTML = months.map(month => {
+      const ev = cache.events.find(e=>e.month===month);
+      const items = byMonth[month].sort((a,b)=>a.order_num-b.order_num);
+      return items.map((p, i) => `<tr>
+        ${i===0 ? `<td rowspan="${items.length}" style="vertical-align:top;padding-top:14px;">
+          <span class="tag" style="font-size:10px;">${fmtMonth(month)}</span>
+        </td>
+        <td rowspan="${items.length}" style="vertical-align:top;padding-top:14px;color:var(--c3);font-size:12px;">
+          ${ev?ev.date:'—'}
+        </td>` : ''}
+        <td>${p.title}</td>
+        <td style="color:var(--c3);font-size:12px;">${p.presenter}</td>
+        <td style="color:var(--c3);font-size:12px;">${p.duration_min?p.duration_min+'분':'—'}</td>
+        <td style="text-align:right;white-space:nowrap;">
+          <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="editPres('${p.id}')">수정</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRow('anbang_presentations','${p.id}')">삭제</button>
+        </td>
+      </tr>`).join('');
+    }).join('');
+  }
+  renderGrouped(cache.presentations.filter(p=>p.type!=='AI CAN DO'), 'admin-pres-body-실무');
+  renderGrouped(cache.presentations.filter(p=>p.type==='AI CAN DO'), 'admin-pres-body-ai');
 }
 
 function renderAdminHosts(){
@@ -1176,7 +1194,7 @@ function renderAdminPeople(){
   }).join('') : '<tr><td colspan="7" style="color:var(--c2);padding:16px;">없음</td></tr>';
 
   // 앉방마님 미경험자
-  const nohost = anbang.filter(p=>!hasHost(p.name));
+  const nohost = anbang.filter(p=>!hasHost(p.name) && !['팀장','총괄팀장','반장','조장'].includes(p.title));
   document.getElementById('admin-people-nohost-body').innerHTML = nohost.length ? nohost.map(p=>`
     <tr style="background:#fafafa;">
       <td style="font-weight:500;color:var(--c3);">${p.name}</td>
