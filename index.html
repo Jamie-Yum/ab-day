@@ -813,10 +813,10 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeMenu(); clo
 // 스크롤 이벤트 - 네비 배경 + active
 // 섹션 배경색 정의
 const SEC_COLORS = [
-  { id: 'sec-home',      bg: '#1e2540' },
-  { id: 'sec-event',     bg: '#eef0f6' },
-  { id: 'sec-story',     bg: '#2b3368' },
-  { id: 'sec-presenter', bg: '#fdf6ee' },
+  { id: 'sec-home',      bg: '#1e2540', gradient: 'radial-gradient(ellipse at 25% 75%, #4a1a7a 0%, #1e2540 55%, #080d1a 100%)' },
+  { id: 'sec-event',     bg: '#eef0f6', gradient: 'radial-gradient(ellipse at 75% 25%, #ffffff 0%, #eef0f6 55%, #c8d4ee 100%)' },
+  { id: 'sec-story',     bg: '#2b3368', gradient: 'radial-gradient(ellipse at 20% 80%, #0a2060 0%, #2b3368 50%, #110d40 100%)' },
+  { id: 'sec-presenter', bg: '#fdf6ee', gradient: 'radial-gradient(ellipse at 80% 20%, #fff3e0 0%, #fdf6ee 55%, #ead5b0 100%)' },
 ];
 
 function hexToRgb(hex){
@@ -864,7 +864,14 @@ function updateBg(){
   }
 
   const rgb = lerpColor(hexToRgb(cur.bg), hexToRgb(next.bg), t);
-  document.body.style.background = rgbStr(rgb);
+  // 섹션 내부(전환 없음)일 때 그라데이션, 전환 중일 때 보간 단색
+  if(t < 0.05 && cur.gradient){
+    document.body.style.background = cur.gradient;
+  } else if(t > 0.95 && next.gradient){
+    document.body.style.background = next.gradient;
+  } else {
+    document.body.style.background = rgbStr(rgb);
+  }
 
   // 네비 색상도 부드럽게
   const nav = document.getElementById('nav');
