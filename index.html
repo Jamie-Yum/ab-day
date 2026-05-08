@@ -990,7 +990,7 @@ function renderStoryEvents(){
           <div class="event-row-date">${e.date||e.month}</div>
         </div>
         <div class="event-row-divider"></div>
-        <div class="event-row-host">앉방마님 · ${e.host_team||'—'}&nbsp;&nbsp;${getHostNames(e.month)}</div>
+        <div class="event-row-host">앉방마님 : ${getHostNamesWithTeam(e.month)}</div>
         <div class="event-row-count">발표 ${pres.length}개</div>
         <div class="event-row-chevron">▾</div>
       </div>
