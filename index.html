@@ -613,11 +613,20 @@ tr:hover td{background:var(--c0);}
           </div>
           <!-- 앉방마님 미경험자 -->
           <div style="font-size:12px;font-weight:600;color:var(--c2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">앉방마님 미경험</div>
-          <div class="card" style="overflow:hidden;">
+          <div class="card" style="overflow:hidden;margin-bottom:20px;">
             <table>
               <thead><tr><th>이름</th><th>팀</th><th>직함</th><th>실무 발표</th><th>AI CAN DO</th><th>상태</th></tr></thead>
               <tbody id="admin-people-nohost-body"><tr><td colspan="6" class="loading">불러오는 중...</td></tr></tbody>
             </table>
+          </div>
+          <div id="admin-people-excluded-section" style="display:none;">
+            <div style="font-size:12px;font-weight:600;color:var(--c2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">참여 어려운 인원</div>
+            <div class="card" style="overflow:hidden;">
+              <table>
+                <thead><tr><th>이름</th><th>팀</th><th>상태</th><th></th></tr></thead>
+                <tbody id="admin-people-excluded-body"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -1300,7 +1309,13 @@ function statusSelect(personId, current){
 async function saveStatus(personId, status){
   await sb.from('anbang_people').update({status: status||null}).eq('id', personId);
   await loadAll();
+  // 탭 상태 유지하면서 재렌더
   renderAdminPeople();
+  // anbang 탭이 열려있으면 유지
+  if(currentPeopleTab === 'anbang'){
+    document.getElementById('people-body-all').style.display = 'none';
+    document.getElementById('people-body-anbang').style.display = '';
+  }
 }
 
 let peopleSortKey='name', peopleSortAsc=true;
@@ -1382,18 +1397,36 @@ function renderAdminPeople(){
   // 앉방마님 미경험자
   const nohost = anbang.filter(p=>!hasHost(p.name) && !['팀장','총괄팀장','반장','조장'].includes(p.title));
   // 상태별 그룹핑: 상태 없는 사람 먼저, 상태 있는 사람은 아래
+  // 상태 없는 사람만 미경험 표에, 상태 있는 사람은 별도 표로
   const nohost_normal = nohost.filter(p=>!p.status);
-  const nohost_status = nohost.filter(p=>p.status);
-  const nohostAll = [...nohost_normal, ...nohost_status];
-  document.getElementById('admin-people-nohost-body').innerHTML = nohostAll.length ? nohostAll.map(p=>`
-    <tr style="${p.status?'background:#fafafa;':''}">
-      <td style="font-weight:500;color:${p.status?'var(--c2)':'var(--c5)'};">${p.name}</td>
-      <td style="color:var(--c3);">${p.team}</td>
-      <td style="color:var(--c2);font-size:12px;">${p.title||'—'}</td>
-      <td style="max-width:140px;">${presTagsHtml(p.name,'실무')}</td>
-      <td style="max-width:140px;">${presTagsHtml(p.name,'ai')}</td>
-      <td style="white-space:nowrap;">${statusSelect(p.id, p.status||'')}</td>
-    </tr>`).join('') : '<tr><td colspan="6" style="color:var(--c2);padding:16px;">모두 경험했어요 🎉</td></tr>';
+  const nohost_excluded = nohost.filter(p=>p.status);
+
+  document.getElementById('admin-people-nohost-body').innerHTML = nohost_normal.length
+    ? nohost_normal.map(p=>`
+      <tr>
+        <td style="font-weight:500;color:var(--c5);">${p.name}</td>
+        <td style="color:var(--c3);">${p.team}</td>
+        <td style="color:var(--c2);font-size:12px;">${p.title||'—'}</td>
+        <td style="max-width:140px;">${presTagsHtml(p.name,'실무')}</td>
+        <td style="max-width:140px;">${presTagsHtml(p.name,'ai')}</td>
+        <td style="white-space:nowrap;">${statusSelect(p.id, p.status||'')}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" style="color:var(--c2);padding:16px;">모두 경험했어요 🎉</td></tr>';
+
+  // 참여 어려운 인원 표
+  const excludedSection = document.getElementById('admin-people-excluded-section');
+  if(nohost_excluded.length){
+    excludedSection.style.display = '';
+    document.getElementById('admin-people-excluded-body').innerHTML = nohost_excluded.map(p=>`
+      <tr>
+        <td style="font-weight:500;color:var(--c5);">${p.name}</td>
+        <td style="color:var(--c3);">${p.team}</td>
+        <td>${statusBadge(p.status)}</td>
+        <td style="text-align:right;white-space:nowrap;">${statusSelect(p.id, p.status||'')}</td>
+      </tr>`).join('');
+  } else {
+    excludedSection.style.display = 'none';
+  }
 }
 
 function switchAdminTab(tab,btn){
