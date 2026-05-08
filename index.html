@@ -35,7 +35,7 @@
   --c0:#f0f1f5;--c1:#e8eaf0;--c2:#7a8499;--c3:#3d4560;--c4:#1e2540;--c5:#111827;
 }
 html{scroll-behavior:smooth;}
-body{font-family:'Pretendard','Noto Sans KR',sans-serif;background:#1e2540;color:var(--w);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+body{font-family:'Pretendard','Noto Sans KR',sans-serif;background:transparent;color:var(--w);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 
 /* ── 네비 ── */
 #nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;transition:background 0.3s;background:rgba(30,37,64,0.0);}
@@ -63,7 +63,7 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .inner{max-width:960px;margin:0 auto;width:100%;}
 
 /* ── 홈 히어로 ── */
-#sec-home{position:relative;overflow:hidden;padding:0 48px;}
+#sec-home{position:relative;overflow:hidden;padding:0 48px;background:radial-gradient(ellipse at 25% 75%,#4a1a7a 0%,#1e2540 55%,#080d1a 100%);}
 .hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);background-size:80px 80px;}
 .hero-bg-radial{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 70%,rgba(30,37,64,0.0) 0%,#1e2540 100%);}
 .hero-inner{position:relative;z-index:1;max-width:960px;margin:0 auto;width:100%;display:flex;flex-direction:column;justify-content:center;min-height:100vh;padding:80px 0;}
@@ -89,7 +89,7 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .sec-sub{font-size:16px;color:var(--c4);line-height:1.7;}
 
 /* ── 행사 안내 섹션 ── */
-#sec-event{background:transparent;}
+#sec-event{background:radial-gradient(ellipse at 75% 25%,#ffffff 0%,#eef0f6 55%,#c8d4ee 100%);}
 .theme-box{border:1px solid rgba(30,37,64,0.1);border-radius:16px;padding:40px 48px;margin:48px 0 40px;background:#fff;position:relative;overflow:hidden;}
 .theme-box::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(30,37,64,0.03) 0%,transparent 70%);}
 .theme-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.6);margin-bottom:12px;}
@@ -105,7 +105,7 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .pres-dur{font-size:12px;color:var(--c2);white-space:nowrap;}
 
 /* ── 발표자 가이드 섹션 ── */
-#sec-presenter{background:transparent;}
+#sec-presenter{background:radial-gradient(ellipse at 80% 20%,#fff3e0 0%,#fdf6ee 55%,#ead5b0 100%);}
 
 .guide-cards{display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;margin-top:32px;}
 .guide-card{background:#fff;cursor:pointer;}
@@ -138,7 +138,7 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .submit-card-body{font-size:13px;color:var(--w2);line-height:2.0;}
 
 /* ── 지난 앉방데이 섹션 ── */
-#sec-story{background:transparent;}
+#sec-story{background:radial-gradient(ellipse at 20% 80%,#0a2060 0%,#2b3368 50%,#110d40 100%);}
 .story-search{width:100%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:12px 18px;font-size:14px;font-family:inherit;color:#ffffff;outline:none;transition:border-color 0.15s;margin-bottom:20px;}
 .story-search::placeholder{color:rgba(255,255,255,0.5);}
 .story-search:focus{border-color:rgba(255,255,255,0.4);}
@@ -865,11 +865,13 @@ function updateBg(){
 
   const rgb = lerpColor(hexToRgb(cur.bg), hexToRgb(next.bg), t);
   // 섹션 내부(전환 없음)일 때 그라데이션, 전환 중일 때 보간 단색
-  if(t < 0.05 && cur.gradient){
-    document.body.style.background = cur.gradient;
-  } else if(t > 0.95 && next.gradient){
-    document.body.style.background = next.gradient;
+  if(t < 0.05){
+    // 섹션 내부 - body 배경 제거, 섹션 자체 CSS 배경 사용
+    document.body.style.background = '';
+  } else if(t > 0.95){
+    document.body.style.background = '';
   } else {
+    // 전환 중 - 보간 단색으로 부드럽게 연결
     document.body.style.background = rgbStr(rgb);
   }
 
@@ -959,13 +961,20 @@ async function renderStory(){
 }
 
 function getHostNames(month){
-  const hosts=cache.hosts.filter(h=>h.event_month===month);
+  const hosts=cache.hosts.filter(h=>h.event_month===month).sort((a,b)=>a.order_num-b.order_num);
   if(!hosts.length) return '—';
-  const lead=hosts.find(h=>h.is_lead);
-  const others=hosts.filter(h=>!h.is_lead);
-  let parts=[];
-  if(lead) parts.push(lead.name);
-  if(others.length) parts.push(`외 ${others.length}인`);
+  return hosts.map(h=>h.name).join(', ');
+}
+
+function getHostNamesWithTeam(month){
+  const hosts=cache.hosts.filter(h=>h.event_month===month).sort((a,b)=>a.order_num-b.order_num);
+  if(!hosts.length) return '—';
+  return hosts.map(h=>{
+    const info=peopleMap[h.name];
+    const team=info?`<span style="font-size:12px;color:rgba(255,255,255,0.55);margin-left:3px;">${info.team}</span>`:'';
+    return `${h.name}${team}`;
+  }).join('<span style="color:rgba(255,255,255,0.3);margin:0 6px;">·</span>');
+}인`);
   return parts.join(' ');
 }
 
