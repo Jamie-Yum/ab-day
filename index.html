@@ -374,39 +374,39 @@ tr:hover td{background:var(--c0);}
         <div class="guide-card-header">
           <div class="guide-card-header-left">
             <div class="guide-card-type">Type 01</div>
-            <div class="guide-card-name">실무 발표</div>
+            <div class="guide-card-name" id="guide-name-0">실무 발표</div>
           </div>
           <div class="guide-card-chevron">▾</div>
         </div>
         <div class="guide-card-body">
-          <div class="guide-card-meta"><span class="guide-card-meta-tag">10–20분</span><span class="guide-card-meta-tag">형식 자유</span><span class="guide-card-meta-tag">협의 가능</span></div>
-          <div class="guide-card-desc">프로젝트 경험, 협업 이야기, 업무 개선 사례 등 자유 형식으로 나누는 발표입니다. 발표 길이와 형식은 운영팀과 협의 가능합니다.</div>
+          <div class="guide-card-meta" id="guide-meta-0"><span class="guide-card-meta-tag">10–20분</span><span class="guide-card-meta-tag">형식 자유</span><span class="guide-card-meta-tag">협의 가능</span></div>
+          <div class="guide-card-desc" id="guide-desc-0">프로젝트 경험, 협업 이야기, 업무 개선 사례 등 자유 형식으로 나누는 발표입니다. 발표 길이와 형식은 운영팀과 협의 가능합니다.</div>
         </div>
       </div>
       <div class="guide-card" onclick="toggleGuide(this)">
         <div class="guide-card-header">
           <div class="guide-card-header-left">
             <div class="guide-card-type">Type 02</div>
-            <div class="guide-card-name">AI CAN DO</div>
+            <div class="guide-card-name" id="guide-name-1">AI CAN DO</div>
           </div>
           <div class="guide-card-chevron">▾</div>
         </div>
         <div class="guide-card-body">
-          <div class="guide-card-meta"><span class="guide-card-meta-tag">15분 발표</span><span class="guide-card-meta-tag">화면 시연 가능</span><span class="guide-card-meta-tag">직군 무관</span></div>
-          <div class="guide-card-desc">AI 도구를 실무에 적용한 경험을 나누는 발표입니다. 어떤 도구를, 어떤 상황에, 어떻게 썼는지를 중심으로 구성해주세요. 이론보다 실제 사례 위주가 훨씬 좋습니다.</div>
+          <div class="guide-card-meta" id="guide-meta-1"><span class="guide-card-meta-tag">15분 발표</span><span class="guide-card-meta-tag">화면 시연 가능</span><span class="guide-card-meta-tag">직군 무관</span></div>
+          <div class="guide-card-desc" id="guide-desc-1">AI 도구를 실무에 적용한 경험을 나누는 발표입니다. 어떤 도구를, 어떤 상황에, 어떻게 썼는지를 중심으로 구성해주세요. 이론보다 실제 사례 위주가 훨씬 좋습니다.</div>
         </div>
       </div>
       <div class="guide-card" onclick="toggleGuide(this)">
         <div class="guide-card-header">
           <div class="guide-card-header-left">
             <div class="guide-card-type">Type 03</div>
-            <div class="guide-card-name">KGI 발표</div>
+            <div class="guide-card-name" id="guide-name-2">KGI 발표</div>
           </div>
           <div class="guide-card-chevron">▾</div>
         </div>
         <div class="guide-card-body">
-          <div class="guide-card-meta"><span class="guide-card-meta-tag">10–15분</span><span class="guide-card-meta-tag">데이터 중심</span><span class="guide-card-meta-tag">슬라이드 10장↓</span></div>
-          <div class="guide-card-desc">분기 핵심 성과 지표를 공유하는 팀 발표입니다. 팀장 또는 리더가 주도하며, 수치 기반으로 분기 성과를 정리하고 다음 분기 방향성까지 담는 것을 권장합니다.</div>
+          <div class="guide-card-meta" id="guide-meta-2"><span class="guide-card-meta-tag">10–15분</span><span class="guide-card-meta-tag">데이터 중심</span><span class="guide-card-meta-tag">슬라이드 10장↓</span></div>
+          <div class="guide-card-desc" id="guide-desc-2">분기 핵심 성과 지표를 공유하는 팀 발표입니다. 팀장 또는 리더가 주도하며, 수치 기반으로 분기 성과를 정리하고 다음 분기 방향성까지 담는 것을 권장합니다.</div>
         </div>
       </div>
     </div>
@@ -633,15 +633,24 @@ tr:hover td{background:var(--c0);}
 
       <!-- 설정 -->
       <div id="admin-settings" style="display:none;">
-        <div style="max-width:480px;">
-          <div class="section-title" style="margin-bottom:16px;">전역 설정</div>
-          <div class="card" style="padding:24px;">
-            <div class="form-group">
-              <label class="form-label">자료 제출 드라이브 링크</label>
-              <input class="form-input" id="setting-drive-url" placeholder="https://drive.google.com/..." />
-              <div style="font-size:11px;color:var(--c2);margin-top:6px;">발표자 가이드 페이지에 표시되는 드라이브 바로가기 링크</div>
+        <div style="max-width:560px;display:flex;flex-direction:column;gap:24px;">
+          <div>
+            <div class="section-title" style="margin-bottom:16px;">전역 설정</div>
+            <div class="card" style="padding:24px;">
+              <div class="form-group">
+                <label class="form-label">자료 제출 드라이브 링크</label>
+                <input class="form-input" id="setting-drive-url" placeholder="https://drive.google.com/..." />
+                <div style="font-size:11px;color:var(--c2);margin-top:6px;">발표자 가이드 페이지에 표시되는 드라이브 바로가기 링크</div>
+              </div>
+              <button class="btn btn-primary" onclick="saveSetting('drive_url','setting-drive-url')">저장</button>
             </div>
-            <button class="btn btn-primary" onclick="saveSetting('drive_url','setting-drive-url')">저장</button>
+          </div>
+          <div>
+            <div class="section-title" style="margin-bottom:16px;">발표 유형 안내 편집</div>
+            <div style="display:flex;flex-direction:column;gap:16px;" id="guide-type-editors">
+              <!-- JS로 렌더링 -->
+              <div style="font-size:13px;color:var(--c2);">불러오는 중...</div>
+            </div>
           </div>
         </div>
       </div>
@@ -740,6 +749,12 @@ const STATUS_OPTIONS = [
 
 let cache = { events:[], presentations:[], hosts:[], people:[], settings:{} };
 let peopleMap = {};
+
+const DEFAULT_GUIDE_TYPES = [
+  { key:'guide_type_0', name:'실무 발표', tags:['10–20분','형식 자유','협의 가능'], desc:'프로젝트 경험, 협업 이야기, 업무 개선 사례 등 자유 형식으로 나누는 발표입니다. 발표 길이와 형식은 운영팀과 협의 가능합니다.' },
+  { key:'guide_type_1', name:'AI CAN DO', tags:['15분 발표','화면 시연 가능','직군 무관'], desc:'AI 도구를 실무에 적용한 경험을 나누는 발표입니다. 어떤 도구를, 어떤 상황에, 어떻게 썼는지를 중심으로 구성해주세요. 이론보다 실제 사례 위주가 훨씬 좋습니다.' },
+  { key:'guide_type_2', name:'KGI 발표', tags:['10–15분','데이터 중심','슬라이드 10장↓'], desc:'분기 핵심 성과 지표를 공유하는 팀 발표입니다. 팀장 또는 리더가 주도하며, 수치 기반으로 분기 성과를 정리하고 다음 분기 방향성까지 담는 것을 권장합니다.' },
+];
 
 // ── 유틸 ──
 function fmtMonth(m){
@@ -841,6 +856,8 @@ async function loadAll(){
   cache.people.forEach(function(p){ peopleMap[p.name]={team:p.team,title:p.title,status:p.status}; });
   var driveBtn = document.getElementById('drive-link-btn');
   if(driveBtn && cache.settings.drive_url) driveBtn.href = cache.settings.drive_url;
+  // 발표 유형 안내 렌더 (DB 값 우선)
+  renderGuideTypes();
 }
 
 // ── 섹션 배경 그라데이션 ──
@@ -1161,6 +1178,7 @@ async function loadAdminData(){
   renderAdminPres();
   renderAdminHosts();
   renderAdminPeople();
+  renderAdminGuideTypes();
   var driveInput = document.getElementById('setting-drive-url');
   if(driveInput && cache.settings.drive_url) driveInput.value = cache.settings.drive_url;
 }
@@ -1503,6 +1521,64 @@ async function saveSetting(key,inputId){
   await loadAll();
   alert('저장되었습니다');
 }
+
+// ── 발표 유형 안내 ──
+function getGuideType(idx){
+  var def = DEFAULT_GUIDE_TYPES[idx];
+  var raw = cache.settings[def.key];
+  if(raw){ try{ return Object.assign({}, def, JSON.parse(raw)); } catch(e){} }
+  return def;
+}
+
+function renderGuideTypes(){
+  DEFAULT_GUIDE_TYPES.forEach(function(_, idx){
+    var gt = getGuideType(idx);
+    var nameEl = document.getElementById('guide-name-'+idx);
+    var metaEl = document.getElementById('guide-meta-'+idx);
+    var descEl = document.getElementById('guide-desc-'+idx);
+    if(nameEl) nameEl.textContent = gt.name;
+    if(metaEl) metaEl.innerHTML = gt.tags.map(function(t){ return '<span class="guide-card-meta-tag">'+t+'</span>'; }).join('');
+    if(descEl) descEl.textContent = gt.desc;
+  });
+}
+
+function renderAdminGuideTypes(){
+  var container = document.getElementById('guide-type-editors');
+  if(!container) return;
+  container.innerHTML = DEFAULT_GUIDE_TYPES.map(function(_, idx){
+    var gt = getGuideType(idx);
+    return '<div class="card" style="padding:20px 24px;">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--c4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;">Type 0'+(idx+1)+' · '+gt.name+'</div>'
+      +'<div class="form-group"><label class="form-label">유형 이름</label>'
+      +'<input class="form-input" id="gt-name-'+idx+'" value="'+escHtml(gt.name)+'"/></div>'
+      +'<div class="form-group"><label class="form-label">태그 (최대 3개, 쉼표로 구분)</label>'
+      +'<input class="form-input" id="gt-tags-'+idx+'" value="'+escHtml(gt.tags.join(', '))+'"/>'
+      +'<div style="font-size:11px;color:var(--c2);margin-top:4px;">예: 10–20분, 형식 자유, 협의 가능</div></div>'
+      +'<div class="form-group"><label class="form-label">설명</label>'
+      +'<textarea class="form-input" id="gt-desc-'+idx+'" rows="3" style="resize:vertical;">'+escHtml(gt.desc)+'</textarea></div>'
+      +'<button class="btn btn-primary btn-sm" onclick="saveGuideType('+idx+')">저장</button>'
+      +'</div>';
+  }).join('');
+}
+
+function escHtml(str){
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function saveGuideType(idx){
+  var name = document.getElementById('gt-name-'+idx).value.trim();
+  var tagsRaw = document.getElementById('gt-tags-'+idx).value;
+  var desc = document.getElementById('gt-desc-'+idx).value.trim();
+  var tags = tagsRaw.split(',').map(function(t){ return t.trim(); }).filter(Boolean).slice(0,3);
+  if(!name || !desc) return alert('이름과 설명을 입력하세요');
+  var key = DEFAULT_GUIDE_TYPES[idx].key;
+  var val = JSON.stringify({name:name, tags:tags, desc:desc});
+  await sb.from('anbang_settings').upsert({key:key, value:val, updated_at:new Date().toISOString()});
+  await loadAll();
+  renderAdminGuideTypes();
+  alert('저장되었습니다');
+}
+
 
 function switchPresTab(tab,btn){
   ['실무','ai'].forEach(function(t){ document.getElementById('pres-sub-'+t+'-body').style.display = t===tab?'':'none'; });
