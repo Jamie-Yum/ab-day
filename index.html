@@ -998,16 +998,27 @@ async function renderEvent(){
     document.getElementById('event-pres-list').innerHTML = '<div class="pres-item"><span style="color:var(--w3);font-size:13px;">등록된 발표가 없습니다</span></div>';
     return;
   }
-  document.getElementById('event-pres-list').innerHTML = pres.map(function(p,i){
-    var h = '<div class="pres-item">';
-    h += '<span class="pres-num">'+String(i+1).padStart(2,'0')+'</span>';
-    h += '<div class="pres-info"><div class="pres-title">'+p.title+'</div>';
-    h += '<div class="pres-presenter">'+withTeam(p.presenter)+'</div></div>';
-    h += typePillHtml(p.type);
-    h += '<span class="pres-dur">'+(p.duration_min?p.duration_min+'분':'')+'</span>';
-    h += '</div>';
-    return h;
-  }).join('');
+  document.getElementById('event-pres-list').innerHTML = (function(){
+    var num = 0;
+    return pres.map(function(p){
+      if(p.type==='쉬는 시간'){
+        var h='<div class="pres-item" style="opacity:0.55;justify-content:space-between;">';
+        h+='<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:12px;color:var(--w3);">☕</span><span style="font-size:13px;color:var(--w3);font-style:italic;">쉬는 시간</span></div>';
+        h+='<span class="pres-dur">'+(p.duration_min?p.duration_min+'분':'')+'</span>';
+        h+='</div>';
+        return h;
+      }
+      num++;
+      var h = '<div class="pres-item">';
+      h += '<span class="pres-num">'+String(num).padStart(2,'0')+'</span>';
+      h += '<div class="pres-info"><div class="pres-title">'+p.title+'</div>';
+      h += '<div class="pres-presenter">'+withTeam(p.presenter)+'</div></div>';
+      h += typePillHtml(p.type);
+      h += '<span class="pres-dur">'+(p.duration_min?p.duration_min+'분':'')+'</span>';
+      h += '</div>';
+      return h;
+    }).join('');
+  })();
 }
 
 // ── 지난 앉방데이 ──
@@ -1222,24 +1233,33 @@ function selectEvent(month){
     var info=peopleMap[h.name];
     return '<span style="font-size:13px;color:var(--c5);">'+h.name+'</span>'+(info?'<span style="font-size:11px;color:var(--c2);margin-left:3px;">('+info.team+')</span>':'');
   }).join('<span style="color:var(--c1);margin:0 6px;">·</span>') : '<span style="color:var(--c2);">등록된 명단 없음</span>';
-  var presHtml = pres.length ? pres.map(function(p){
-    if(p.type==='쉬는 시간'){
-      var h='<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--c1);opacity:0.6;">';
-      h+='<div style="flex:1;font-size:12px;color:var(--c3);font-style:italic;">☕ 쉬는 시간</div>';
-      h+='<span style="font-size:12px;color:var(--c2);">'+(p.duration_min?p.duration_min+'분':'')+'</span>';
-      h+='<div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="editPres(\''+p.id+'\')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow(\'anbang_presentations\',\''+p.id+'\')">삭제</button></div>';
-      h+='</div>';
-      return h;
-    }
-    var h='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--c1);">';
-    h+='<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;color:var(--c5);">'+p.title+'</div>';
-    h+='<div style="font-size:12px;color:var(--c3);margin-top:2px;">'+withTeam(p.presenter)+'</div></div>';
-    h+='<span class="tag">'+p.type+'</span>';
-    h+='<span style="font-size:12px;color:var(--c2);">'+(p.duration_min?p.duration_min+'분':'')+'</span>';
-    h+='<div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="editPres(\''+p.id+'\')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow(\'anbang_presentations\',\''+p.id+'\')">삭제</button></div>';
-    h+='</div>';
-    return h;
-  }).join('') : '<div style="color:var(--c2);font-size:13px;padding:12px 0;">등록된 발표 없음</div>';
+  var presHtml = pres.length
+    ? '<div id="pres-sortable" style="display:flex;flex-direction:column;">'
+      + (function(){
+          var num = 0;
+          return pres.map(function(p){
+            var isBreak = p.type==='쉬는 시간';
+            var numLabel = isBreak ? '<span style="width:24px;font-size:12px;color:var(--c1);">—</span>'
+              : '<span style="width:24px;font-size:11px;font-weight:700;color:var(--c2);">'+(++num<10?'0'+num:num)+'</span>';
+            var body = isBreak
+              ? '<div style="flex:1;display:flex;align-items:center;gap:6px;"><span style="font-size:12px;">☕</span><span style="font-size:13px;color:var(--c3);font-style:italic;">쉬는 시간</span></div>'
+              : '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;color:var(--c5);">'+p.title+'</div>'
+                +'<div style="font-size:12px;color:var(--c3);margin-top:2px;">'+withTeam(p.presenter)+'</div></div>'
+                +'<span class="tag" style="flex-shrink:0;">'+p.type+'</span>';
+            return '<div class="pres-sort-row" data-id="'+p.id+'" draggable="true" '
+              +'style="display:flex;align-items:center;gap:10px;padding:10px 8px;border-bottom:1px solid var(--c1);cursor:grab;background:#fff;'+(isBreak?'opacity:0.6;':'')+'\">'
+              +'<span style="color:var(--c1);font-size:14px;cursor:grab;flex-shrink:0;">⠿</span>'
+              +numLabel
+              +body
+              +'<span style="font-size:12px;color:var(--c2);flex-shrink:0;">'+(p.duration_min?p.duration_min+'분':'')+'</span>'
+              +'<div style="display:flex;gap:4px;flex-shrink:0;">'
+              +'<button class="btn btn-ghost btn-sm" onclick="editPres(\''+p.id+'\')">수정</button>'
+              +'<button class="btn btn-danger btn-sm" onclick="deleteRow(\'anbang_presentations\',\''+p.id+'\')">삭제</button>'
+              +'</div></div>';
+          }).join('');
+        })()
+      +'</div>'
+    : '<div style="color:var(--c2);font-size:13px;padding:12px 0;">등록된 발표 없음</div>';
 
   var content='';
   content+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">';
@@ -1257,6 +1277,7 @@ function selectEvent(month){
   content+='<button class="btn btn-primary btn-sm" onclick="openPresModalForEvent(\''+month+'\')">+ 순서 추가</button>';
   content+='</div>'+presHtml;
   document.getElementById('event-detail-content').innerHTML = content;
+  initPresSortable(month);
 }
 
 function renderAdminPres(){
@@ -1453,7 +1474,61 @@ function editEvent(id){
   openModal('event-modal');
 }
 
-function onPresTypeChange(){
+function initPresSortable(month){
+  var container = document.getElementById('pres-sortable');
+  if(!container) return;
+  var dragging = null;
+
+  container.querySelectorAll('.pres-sort-row').forEach(function(row){
+    row.addEventListener('dragstart', function(e){
+      dragging = row;
+      row.style.opacity = '0.4';
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    row.addEventListener('dragend', function(){
+      row.style.opacity = '';
+      dragging = null;
+      container.querySelectorAll('.pres-sort-row').forEach(function(r){ r.style.borderTop = ''; });
+      savePresOrder(month);
+    });
+    row.addEventListener('dragover', function(e){
+      e.preventDefault();
+      if(row === dragging) return;
+      container.querySelectorAll('.pres-sort-row').forEach(function(r){ r.style.borderTop = ''; });
+      row.style.borderTop = '2px solid var(--c4)';
+      var rect = row.getBoundingClientRect();
+      var mid = rect.top + rect.height / 2;
+      if(e.clientY < mid){
+        container.insertBefore(dragging, row);
+      } else {
+        container.insertBefore(dragging, row.nextSibling);
+      }
+    });
+  });
+}
+
+async function savePresOrder(month){
+  var container = document.getElementById('pres-sortable');
+  if(!container) return;
+  var rows = container.querySelectorAll('.pres-sort-row');
+  var updates = [];
+  rows.forEach(function(row, idx){
+    updates.push(sb.from('anbang_presentations').update({order_num: idx}).eq('id', row.dataset.id));
+  });
+  await Promise.all(updates);
+  await loadAll();
+  // 번호만 다시 렌더 (전체 selectEvent 재호출 없이)
+  var num = 0;
+  rows.forEach(function(row){
+    var isBreak = row.querySelector('[style*="italic"]') !== null;
+    var numEl = row.querySelectorAll('span')[1];
+    if(numEl){
+      if(isBreak){ numEl.textContent = '—'; }
+      else { num++; numEl.textContent = num < 10 ? '0'+num : ''+num; }
+    }
+  });
+}
+
   var type = document.getElementById('pm-type').value;
   var detailFields = document.getElementById('pm-detail-fields');
   detailFields.style.display = type === '쉬는 시간' ? 'none' : '';
