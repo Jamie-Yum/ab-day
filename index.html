@@ -1529,9 +1529,10 @@ async function savePresOrder(month){
   });
 }
 
+function onPresTypeChange(){
   var type = document.getElementById('pm-type').value;
   var detailFields = document.getElementById('pm-detail-fields');
-  detailFields.style.display = type === '쉬는 시간' ? 'none' : '';
+  detailFields.style.display = (type === '쉬는 시간') ? 'none' : 'block';
 }
 
 async function savePresentation(){
@@ -1683,7 +1684,7 @@ function switchPresTab(tab,btn){
   document.querySelectorAll('#admin-presentations .tab').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   var addBtn = document.getElementById('pres-add-btn');
-  if(addBtn) addBtn.style.display = tab==='guide' ? 'none' : '';
+  if(addBtn) addBtn.style.display = (tab==='guide') ? 'none' : 'inline-flex';
   if(tab==='guide') renderAdminGuideTypes();
 }
 
