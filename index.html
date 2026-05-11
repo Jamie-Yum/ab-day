@@ -542,7 +542,7 @@ tr:hover td{background:var(--c0);}
             <button class="tab" id="pres-sub-ai" onclick="switchPresTab('ai',this)">AI CAN DO</button>
             <button class="tab" id="pres-sub-guide" onclick="switchPresTab('guide',this)">유형 안내 편집</button>
           </div>
-          <button class="btn btn-primary btn-sm" id="pres-add-btn" onclick="openModal('pres-modal')">+ 발표 추가</button>
+          <button class="btn btn-primary btn-sm" id="pres-add-btn" onclick="openModal('pres-modal')">+ 순서 추가</button>
         </div>
         <div id="pres-sub-실무-body" class="card" style="overflow:hidden;">
           <table><thead><tr><th>행사</th><th>날짜</th><th>발표 제목</th><th>발표자</th><th>시간</th><th></th></tr></thead>
@@ -673,19 +673,29 @@ tr:hover td{background:var(--c0);}
 
 <div class="modal-bg" id="pres-modal">
   <div class="modal">
-    <div class="modal-title" id="pres-modal-title">발표 추가</div>
+    <div class="modal-title" id="pres-modal-title">순서 추가</div>
     <input type="hidden" id="pm-id"/>
     <div class="form-group"><label class="form-label">행사 월</label><select class="form-select" id="pm-month"></select></div>
-    <div class="form-group"><label class="form-label">발표 제목</label><input class="form-input" id="pm-title" placeholder="발표 제목"/></div>
-    <div class="form-group"><label class="form-label">발표자 (복수 시 콤마 구분)</label><input class="form-input" id="pm-presenter" placeholder="홍길동, 김철수"/></div>
     <div class="form-group"><label class="form-label">유형</label>
-      <select class="form-select" id="pm-type">
-        <option value="KGI">KGI</option><option value="AI CAN DO">AI CAN DO</option>
-        <option value="실무공유">실무공유</option><option value="전략">전략</option>
-        <option value="마케팅">마케팅</option><option value="VOC">VOC</option><option value="기타">기타</option>
+      <select class="form-select" id="pm-type" onchange="onPresTypeChange()">
+        <option value="실무공유">실무공유</option>
+        <option value="AI CAN DO">AI CAN DO</option>
+        <option value="KGI">KGI</option>
+        <option value="신입구성원 소개">신입구성원 소개</option>
+        <option value="ICE Breaking">ICE Breaking</option>
+        <option value="퀴즈">퀴즈</option>
+        <option value="쉬는 시간">쉬는 시간</option>
+        <option value="전략">전략</option>
+        <option value="마케팅">마케팅</option>
+        <option value="VOC">VOC</option>
+        <option value="기타">기타</option>
       </select>
     </div>
-    <div class="form-group"><label class="form-label">발표 시간 (분)</label><input class="form-input" id="pm-duration" type="number" placeholder="15"/></div>
+    <div id="pm-detail-fields">
+      <div class="form-group"><label class="form-label">제목</label><input class="form-input" id="pm-title" placeholder="제목"/></div>
+      <div class="form-group"><label class="form-label">발표자 (복수 시 콤마 구분)</label><input class="form-input" id="pm-presenter" placeholder="홍길동, 김철수"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">시간 (분)</label><input class="form-input" id="pm-duration" type="number" placeholder="15"/></div>
     <div class="form-group"><label class="form-label">순서</label><input class="form-input" id="pm-order" type="number" placeholder="1"/></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
       <button class="btn btn-ghost" onclick="closeModal('pres-modal')">취소</button>
@@ -1213,6 +1223,14 @@ function selectEvent(month){
     return '<span style="font-size:13px;color:var(--c5);">'+h.name+'</span>'+(info?'<span style="font-size:11px;color:var(--c2);margin-left:3px;">('+info.team+')</span>':'');
   }).join('<span style="color:var(--c1);margin:0 6px;">·</span>') : '<span style="color:var(--c2);">등록된 명단 없음</span>';
   var presHtml = pres.length ? pres.map(function(p){
+    if(p.type==='쉬는 시간'){
+      var h='<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--c1);opacity:0.6;">';
+      h+='<div style="flex:1;font-size:12px;color:var(--c3);font-style:italic;">☕ 쉬는 시간</div>';
+      h+='<span style="font-size:12px;color:var(--c2);">'+(p.duration_min?p.duration_min+'분':'')+'</span>';
+      h+='<div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="editPres(\''+p.id+'\')">수정</button><button class="btn btn-danger btn-sm" onclick="deleteRow(\'anbang_presentations\',\''+p.id+'\')">삭제</button></div>';
+      h+='</div>';
+      return h;
+    }
     var h='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--c1);">';
     h+='<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;color:var(--c5);">'+p.title+'</div>';
     h+='<div style="font-size:12px;color:var(--c3);margin-top:2px;">'+withTeam(p.presenter)+'</div></div>';
@@ -1235,8 +1253,8 @@ function selectEvent(month){
   content+='<div style="background:var(--c0);border-radius:8px;padding:12px;grid-column:1/-1;"><div style="font-size:11px;color:var(--c2);margin-bottom:6px;">앉방마님 명단</div>'+hostsHtml+'</div>';
   content+='</div>';
   content+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
-  content+='<div style="font-size:13px;font-weight:600;color:var(--c5);">발표 세션</div>';
-  content+='<button class="btn btn-primary btn-sm" onclick="openPresModalForEvent(\''+month+'\')">+ 발표 추가</button>';
+  content+='<div style="font-size:13px;font-weight:600;color:var(--c5);">진행 순서</div>';
+  content+='<button class="btn btn-primary btn-sm" onclick="openPresModalForEvent(\''+month+'\')">+ 순서 추가</button>';
   content+='</div>'+presHtml;
   document.getElementById('event-detail-content').innerHTML = content;
 }
@@ -1387,7 +1405,9 @@ function openModal(id){
 function openPresModalForEvent(month){
   document.getElementById('pm-month').innerHTML = cache.events.map(function(e){ return '<option value="'+e.month+'"'+(e.month===month?' selected':'')+'>'+fmtMonth(e.month)+'</option>'; }).join('');
   ['pm-id','pm-title','pm-presenter','pm-duration','pm-order'].forEach(function(id){ document.getElementById(id).value=''; });
-  document.getElementById('pres-modal-title').textContent='발표 추가';
+  document.getElementById('pm-type').value='실무공유';
+  onPresTypeChange();
+  document.getElementById('pres-modal-title').textContent='순서 추가';
   document.getElementById('pres-modal').classList.add('open');
 }
 
@@ -1433,10 +1453,18 @@ function editEvent(id){
   openModal('event-modal');
 }
 
+function onPresTypeChange(){
+  var type = document.getElementById('pm-type').value;
+  var detailFields = document.getElementById('pm-detail-fields');
+  detailFields.style.display = type === '쉬는 시간' ? 'none' : '';
+}
+
 async function savePresentation(){
   var id=document.getElementById('pm-id').value;
-  var data={ event_month:document.getElementById('pm-month').value, title:document.getElementById('pm-title').value.trim(), presenter:document.getElementById('pm-presenter').value.trim(), type:document.getElementById('pm-type').value, duration_min:parseInt(document.getElementById('pm-duration').value)||null, order_num:parseInt(document.getElementById('pm-order').value)||0 };
-  if(!data.title) return alert('제목을 입력하세요');
+  var type=document.getElementById('pm-type').value;
+  var isBreak = type==='쉬는 시간';
+  var data={ event_month:document.getElementById('pm-month').value, title:isBreak?'쉬는 시간':document.getElementById('pm-title').value.trim(), presenter:isBreak?'':document.getElementById('pm-presenter').value.trim(), type:type, duration_min:parseInt(document.getElementById('pm-duration').value)||null, order_num:parseInt(document.getElementById('pm-order').value)||0 };
+  if(!isBreak && !data.title) return alert('제목을 입력하세요');
   if(id) await sb.from('anbang_presentations').update(data).eq('id',id);
   else   await sb.from('anbang_presentations').insert(data);
   closeModal('pres-modal');
@@ -1451,7 +1479,8 @@ function editPres(id){
   openModal('pres-modal');
   setTimeout(function(){
     document.getElementById('pm-id').value=p.id; document.getElementById('pm-month').value=p.event_month; document.getElementById('pm-title').value=p.title; document.getElementById('pm-presenter').value=p.presenter; document.getElementById('pm-type').value=p.type; document.getElementById('pm-duration').value=p.duration_min||''; document.getElementById('pm-order').value=p.order_num||'';
-    document.getElementById('pres-modal-title').textContent='발표 수정';
+    onPresTypeChange();
+    document.getElementById('pres-modal-title').textContent='순서 수정';
   },50);
 }
 
