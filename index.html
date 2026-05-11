@@ -119,12 +119,12 @@ section{min-height:100vh;display:flex;flex-direction:column;justify-content:cent
 .guide-card-body{display:none;padding:0 24px 22px;border-top:1px solid rgba(30,37,64,0.07);}
 .guide-card.open .guide-card-body{display:block;}
 .guide-card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding-top:18px;}
-.guide-card-desc{font-size:14px;color:var(--c3);line-height:1.8;}
+.guide-card-desc{font-size:14px;color:var(--c3);line-height:1.8;white-space:pre-wrap;}
 .guide-card-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--c2);margin-bottom:8px;}
 .guide-card-name{font-size:17px;font-weight:700;color:var(--c5);margin-bottom:6px;}
 .guide-card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 .guide-card-meta-tag{font-size:11px;font-weight:600;color:var(--c3);background:var(--c0);border:1px solid var(--c1);border-radius:999px;padding:3px 10px;white-space:nowrap;}
-.guide-card-desc{font-size:14px;color:var(--c3);line-height:1.8;}
+.guide-card-desc{font-size:14px;color:var(--c3);line-height:1.8;white-space:pre-wrap;}
 .schedule-list{margin-top:0;display:grid;gap:1px;background:rgba(30,37,64,0.07);border:1px solid rgba(30,37,64,0.1);border-radius:12px;overflow:hidden;}
 .schedule-item{display:flex;align-items:flex-start;gap:24px;padding:20px 28px;background:#fff;}
 .schedule-item.highlight{background:#eef0f8;}
@@ -540,7 +540,7 @@ tr:hover td{background:var(--c0);}
           <div style="display:flex;gap:6px;">
             <button class="tab active" id="pres-sub-실무" onclick="switchPresTab('실무',this)">실무 발표</button>
             <button class="tab" id="pres-sub-ai" onclick="switchPresTab('ai',this)">AI CAN DO</button>
-            <button class="tab" id="pres-sub-guide" onclick="switchPresTab('guide',this)">유형 안내 편집</button>
+            <button class="tab" id="pres-sub-guide" onclick="switchPresTab('guide',this)">발표자 안내</button>
           </div>
           <button class="btn btn-primary btn-sm" id="pres-add-btn" onclick="openModal('pres-modal')">+ 순서 추가</button>
         </div>
@@ -1637,7 +1637,7 @@ function renderGuideTypes(){
     var descEl = document.getElementById('guide-desc-'+idx);
     if(nameEl) nameEl.textContent = gt.name;
     if(metaEl) metaEl.innerHTML = gt.tags.map(function(t){ return '<span class="guide-card-meta-tag">'+t+'</span>'; }).join('');
-    if(descEl) descEl.textContent = gt.desc;
+    if(descEl) descEl.innerHTML = gt.desc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   });
 }
 
